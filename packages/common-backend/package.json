@@ -1,0 +1,28 @@
+{
+    "name": "@evir/common-backend",
+    "private": true,
+    "sideEffects": false,
+    "type": "module",
+    "main": "src/index.ts",
+    "module": "src/index.ts",
+    "types": "src/index.ts",
+    "scripts": {
+        "compile": "virmator compile",
+        "docs": "virmator docs",
+        "test": "virmator test node",
+        "test:coverage": "npm run test",
+        "test:update": "npm test update"
+    },
+    "dependencies": {
+        "@augment-vir/assert": "^31.14.1",
+        "@evir/common": "*",
+        "date-vir": "^7.3.1"
+    },
+    "devDependencies": {
+        "@augment-vir/test": "^31.14.1",
+        "@types/node": "^22.14.1"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}

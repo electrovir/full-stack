@@ -1,0 +1,41 @@
+{
+    "name": "@evir/backend",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "compile": "virmator compile",
+        "dev": "tsx --watch src/start-backend.script.ts",
+        "start": "node dist/start-backend.script.js",
+        "test": "virmator test node",
+        "test:coverage": "npm run test",
+        "test:update": "npm test update"
+    },
+    "dependencies": {
+        "@augment-vir/assert": "^31.14.1",
+        "@augment-vir/common": "^31.14.1",
+        "@augment-vir/node": "^31.14.1",
+        "@aws-sdk/client-secrets-manager": "^3.787.0",
+        "@aws-sdk/client-sesv2": "^3.787.0",
+        "@evir/common": "*",
+        "@evir/common-backend": "*",
+        "@evir/database": "*",
+        "@rest-vir/define-service": "^0.15.0",
+        "@rest-vir/implement-service": "^0.15.0",
+        "@rest-vir/run-service": "^0.15.0",
+        "auth-vir": "^0.0.2",
+        "date-vir": "^7.3.1",
+        "parse-email-address": "^0.0.2",
+        "prisma-map": "^1.0.4",
+        "prisma-pglite": "^0.0.2",
+        "updating-secrets": "^0.2.0",
+        "url-vir": "^2.1.3"
+    },
+    "devDependencies": {
+        "@augment-vir/test": "^31.14.1",
+        "@types/node": "^22.14.1",
+        "type-fest": "^4.40.0"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}

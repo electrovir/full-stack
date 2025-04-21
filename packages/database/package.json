@@ -1,0 +1,33 @@
+{
+    "name": "@evir/database",
+    "private": true,
+    "type": "module",
+    "main": "src/index.ts",
+    "module": "src/index.ts",
+    "types": "src/index.ts",
+    "scripts": {
+        "compile": "virmator compile",
+        "postinstall": "npm run prisma generate",
+        "prisma": "npx prisma-pglite",
+        "start": "tsx src/index.ts",
+        "test": "virmator test node",
+        "test:coverage": "npm run test",
+        "test:update": "npm test update"
+    },
+    "dependencies": {
+        "@augment-vir/assert": "^31.14.1",
+        "@augment-vir/common": "^31.14.1",
+        "@prisma/client": "^6.6.0",
+        "date-vir": "^7.3.1",
+        "prisma": "^6.6.0",
+        "prisma-frontend": "^0.2.0",
+        "prisma-map": "^1.0.4",
+        "prisma-pglite": "^0.0.2"
+    },
+    "devDependencies": {
+        "@augment-vir/test": "^31.14.1"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}
