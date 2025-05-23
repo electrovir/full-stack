@@ -1,7 +1,9 @@
 export const defaultUniversalConfig = {
     password: {
-        minLength: 10,
+        minLength: 15,
     },
+    companyProperName: 'Full Stack',
+    productionHost: 'example.com',
 };
 
 /** Config for both frontend and backend. */

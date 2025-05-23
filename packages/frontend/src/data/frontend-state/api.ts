@@ -1,8 +1,10 @@
 import {HttpStatus, mergeDeep} from '@augment-vir/common';
 import {
-    defineTemplateService,
+    defineBackendService,
+    HeaderName,
+    UserStatusHeaderValue,
+    type BackendApi,
     type DeployEnv,
-    type TemplateServiceApi,
     type UserResponse,
 } from '@evir/common';
 import {generateApi, mapServiceDevPort} from '@rest-vir/define-service';
@@ -12,9 +14,9 @@ import {type AsyncProp} from 'element-vir';
 export async function loadApi(
     deployEnv: DeployEnv,
     asyncUser: AsyncProp<UserResponse | undefined, any>,
-): Promise<TemplateServiceApi> {
+): Promise<BackendApi> {
     try {
-        const service = await mapServiceDevPort(defineTemplateService(deployEnv));
+        const service = await mapServiceDevPort(defineBackendService(deployEnv));
 
         return generateApi(service, {
             endpointFetch: {
@@ -39,7 +41,12 @@ export async function loadApi(
                      */
                     if (response.status === HttpStatus.Unauthorized) {
                         asyncUser.setValue(undefined);
-                        wipeCurrentCsrfToken();
+                        if (
+                            response.headers.get(HeaderName.UserStatus) !==
+                            UserStatusHeaderValue.SignUp
+                        ) {
+                            wipeCurrentCsrfToken();
+                        }
                     }
 
                     return response;

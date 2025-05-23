@@ -1,11 +1,12 @@
 import {HttpStatus} from '@augment-vir/common';
-import {EmailCodeType, preparePassword, type TemplateService} from '@evir/common';
+import {EmailCodeType, preparePassword, type BackendService} from '@evir/common';
 import {
     type EndpointImplementationOutput,
     type EndpointImplementationParams,
 } from '@rest-vir/implement-service';
 import {doesPasswordMatchHash} from 'auth-vir';
 import {normalizeEmailAddress} from 'parse-email-address';
+import {InvalidId} from '../../backend-client-interface/auth-client.js';
 import {type BackendContext} from '../create-backend-context.js';
 
 export async function signUp(
@@ -13,9 +14,10 @@ export async function signUp(
     {
         context,
         requestData,
-        request,
-    }: EndpointImplementationParams<BackendContext, TemplateService['endpoints']['/sign-up']>,
-): Promise<EndpointImplementationOutput<TemplateService['endpoints']['/sign-up']['ResponseType']>> {
+        service,
+        requestHeaders,
+    }: EndpointImplementationParams<BackendContext, BackendService['endpoints']['/sign-up']>,
+): Promise<EndpointImplementationOutput<BackendService['endpoints']['/sign-up']['ResponseType']>> {
     const normalizedEmailAddress = normalizeEmailAddress(requestData.emailAddress);
 
     if (!normalizedEmailAddress) {
@@ -61,7 +63,7 @@ export async function signUp(
             }))
         ) {
             void context.emailClient.sendVerificationCode(
-                request.headers.origin || '',
+                requestHeaders.origin || '',
                 {
                     emailAddress: existingUser.emailAddress,
                     id: existingUser.id,
@@ -72,6 +74,12 @@ export async function signUp(
 
         return {
             statusCode: HttpStatus.Ok,
+            headers: await context.authClient.createSuccessfulCookieHeaders({
+                isSignUpCookie: true,
+                requestHeaders,
+                serviceOrigin: service.serviceOrigin,
+                userId: InvalidId,
+            }),
         };
     }
 
@@ -89,7 +97,7 @@ export async function signUp(
     });
 
     void context.emailClient.sendVerificationCode(
-        request.headers.origin || '',
+        requestHeaders.origin || '',
         {
             emailAddress: newUser.emailAddress,
             id: newUser.id,
@@ -99,5 +107,11 @@ export async function signUp(
 
     return {
         statusCode: HttpStatus.Ok,
+        headers: await context.authClient.createSuccessfulCookieHeaders({
+            isSignUpCookie: true,
+            requestHeaders,
+            serviceOrigin: service.serviceOrigin,
+            userId: newUser.id,
+        }),
     };
 }

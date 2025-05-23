@@ -7,6 +7,12 @@ const baseConfig = defineConfig({
         'no-orphans': {
             from: [
                 'src/index\\.ts$',
+                './generated/.',
+            ],
+        },
+        'no-deprecated-core': {
+            from: [
+                './generated/.',
             ],
         },
     },

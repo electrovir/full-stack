@@ -1,10 +1,10 @@
 import {type Overwrite} from '@augment-vir/common';
 import {
     matchesPath,
+    type BackendApi,
     type FrontendFullRoute,
     type FrontendPaths,
     type FrontendSpecificRoute,
-    type TemplateServiceApi,
 } from '@evir/common';
 import {type IsEqual} from 'type-fest';
 import {type createFrontendState} from './create-frontend-state.js';
@@ -43,7 +43,7 @@ export type FullyResolvedFrontendState<
 > = Overwrite<
     FrontendStateInit,
     {
-        api: TemplateServiceApi;
+        api: BackendApi;
         user: IsEqual<RequiresUser, undefined> extends true
             ? Awaited<ReturnType<typeof loadUser>>
             : IsEqual<RequiresUser, false> extends true
@@ -71,6 +71,7 @@ export type FrontendResolution<SpecificPaths extends FrontendFullRoute['paths'] 
     | {
           pending?: false | undefined;
           error?: undefined;
+          resolved: FullyResolvedFrontendState<SpecificPaths>;
           resolvedNoUser: FullyResolvedFrontendState<SpecificPaths, false>;
           resolvedWithUser?: undefined;
       }
@@ -78,6 +79,7 @@ export type FrontendResolution<SpecificPaths extends FrontendFullRoute['paths'] 
           pending?: false | undefined;
           error?: undefined;
           resolvedNoUser?: undefined;
+          resolved: FullyResolvedFrontendState<SpecificPaths>;
           resolvedWithUser: FullyResolvedFrontendState<SpecificPaths, true>;
       };
 
@@ -103,20 +105,24 @@ export function getFrontendResolutionState<PendingState extends PendingFrontendS
     }
 
     if (pendingState.user.settledValue) {
+        const resolvedWithUser = {
+            ...pendingState,
+            api: pendingState.api.settledValue,
+            user: pendingState.user.settledValue,
+        };
         return {
-            resolvedWithUser: {
-                ...pendingState,
-                api: pendingState.api.settledValue,
-                user: pendingState.user.settledValue,
-            },
+            resolved: resolvedWithUser,
+            resolvedWithUser,
         };
     } else {
+        const resolvedNoUser = {
+            ...pendingState,
+            api: pendingState.api.settledValue,
+            user: pendingState.user.settledValue,
+        };
         return {
-            resolvedNoUser: {
-                ...pendingState,
-                api: pendingState.api.settledValue,
-                user: pendingState.user.settledValue,
-            },
+            resolved: resolvedNoUser,
+            resolvedNoUser,
         };
     }
 }

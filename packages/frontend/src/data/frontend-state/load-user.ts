@@ -1,8 +1,10 @@
-import {type TemplateServiceApi, type UserResponse} from '@evir/common';
+import {type MaybePromise} from '@augment-vir/common';
+import {type BackendApi, type UserResponse} from '@evir/common';
 import {getCurrentCsrfToken} from 'auth-vir';
 
+/** Get the currently signed in user. */
 export async function loadUser(
-    apiPromise: Promise<TemplateServiceApi>,
+    apiPromise: MaybePromise<BackendApi>,
 ): Promise<UserResponse | undefined> {
     const csrfToken = getCurrentCsrfToken();
 

@@ -9,3 +9,5 @@
 **/package-lock.json
 **/tsconfig.tsbuildinfo
 /Icon?
+
+packages/database/src/generated/

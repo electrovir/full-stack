@@ -4,6 +4,7 @@ module.exports = {
     ...baseConfig,
     ignorePaths: [
         ...baseConfig.ignorePaths,
+        'packages/database/src/generated/',
     ],
     words: [
         ...baseConfig.words,
@@ -11,5 +12,6 @@ module.exports = {
         'sesv2',
         'cuid',
         'dbname',
+        'aesgcm',
     ],
 };

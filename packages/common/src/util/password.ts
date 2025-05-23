@@ -3,6 +3,9 @@ import {hashPassword} from 'auth-vir';
 import {type RequireExactlyOne} from 'type-fest';
 import {type UniversalConfig} from '../universal-config.js';
 
+// eslint-disable-next-line sonarjs/no-hardcoded-passwords
+export const passwordTooShortErrorMessage = 'Password too short';
+
 export async function preparePassword(
     password: string,
     universalConfig: Readonly<
@@ -24,24 +27,13 @@ export async function preparePassword(
         failureReason: string;
     }>
 > {
-    if (!password) {
-        return {
-            failureReason: 'Password too short',
-        };
-    }
-
     if (password.length < universalConfig.password.minLength) {
         return {
-            failureReason: 'Password too short',
+            failureReason: passwordTooShortErrorMessage,
         };
     }
 
     const hashedPassword = await hashPassword(password);
-    if (!hashedPassword) {
-        return {
-            failureReason: 'Password too long',
-        };
-    }
 
     return {
         password: {

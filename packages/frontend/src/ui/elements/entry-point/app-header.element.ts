@@ -21,27 +21,38 @@ const userButtonStateText: Record<UserButtonState, string> = {
     [UserButtonState.SigningIn]: '',
 };
 
+const headerHeight = 80;
+
 export const AppHeader = defineElement<
-    Readonly<Pick<PendingFrontendState, 'user' | 'currentRoute' | 'router'>>
+    Readonly<Pick<PendingFrontendState, 'user' | 'currentRoute' | 'router' | 'config'>>
 >()({
     tagName: 'app-header',
     styles: css`
         :host {
-            display: block;
+            display: flex;
+            justify-content: center;
         }
 
         nav {
-            ${contentWidthCss}
             overflow: hidden;
             position: relative;
             display: flex;
             justify-content: flex-end;
-            align-items: center;
-            padding: 12px;
+            flex-grow: 1;
+            flex-wrap: wrap-reverse;
+            align-content: flex-end;
+            padding: 0 12px;
             gap: 16px;
+            max-height: ${headerHeight}px;
+            box-sizing: border-box;
+        }
+
+        .button-wrapper {
+            height: ${headerHeight}px;
         }
 
         header {
+            ${contentWidthCss};
             display: flex;
             justify-content: center;
             background-color: rgba(255, 255, 255, 0.4);
@@ -54,10 +65,26 @@ export const AppHeader = defineElement<
         nav > * {
             flex-shrink: 0;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-logo {
+            flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            white-space: nowrap;
+            height: ${headerHeight}px;
+            overflow: hidden;
+        }
+
+        ${ViraLink} {
+            text-decoration: none;
         }
 
         ${AppLogo} {
-            height: 80px;
+            height: inherit;
         }
     `,
     render({inputs, dispatch}) {
@@ -140,9 +167,12 @@ export const AppHeader = defineElement<
                         label: 'logo link to home page',
                     },
                 })}>
-                    <${AppLogo.assign({
-                        tone: LogoTone.color,
-                    })}></${AppLogo}>
+                    <div class="header-logo">
+                        <${AppLogo.assign({
+                            tone: LogoTone.color,
+                        })}></${AppLogo}>
+                        <b>${inputs.config.companyProperName}</b>
+                    </div>
                 </${ViraLink}>
                 <nav>
                     ${renderIf(
@@ -151,7 +181,7 @@ export const AppHeader = defineElement<
                             <p>Welcome ${firstName}</p>
                         `,
                     )}
-                    ${userButtonLinkTemplate || nothing}
+                    <div class="button-wrapper">${userButtonLinkTemplate || nothing}</div>
                 </nav>
             </header>
         `;

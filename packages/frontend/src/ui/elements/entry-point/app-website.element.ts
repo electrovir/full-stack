@@ -1,5 +1,5 @@
 import {log, omitObjectKeys} from '@augment-vir/common';
-import {frontendPathTree, matchesPath, type UserResponse} from '@evir/common';
+import {frontendPathTree, type UserResponse} from '@evir/common';
 import {wipeCurrentCsrfToken} from 'auth-vir';
 import {css, defineElementNoInputs, html, listen} from 'element-vir';
 import {createFrontendState} from '../../../data/frontend-state/create-frontend-state.js';
@@ -8,10 +8,13 @@ import {ChangeRouteEvent} from '../../events/change-route.event.js';
 import {LogOutEvent} from '../../events/log-out.event.js';
 import {UserEditEvent} from '../../events/user-edit.event.js';
 import {contentWidthCss} from '../../styles/styles.js';
-import {AppApp} from '../app/app-app.element.js';
+import {AppDesign} from '../design/app-design.element.js';
 import {AppLandingPage} from '../landing-page/app-landing-page.element.js';
 import {AppModal} from '../modals/app-modal.element.js';
-import {AppVerification} from '../sign-in/app-verification.element.js';
+import {AppApp} from '../top-level-pages/app-app-page.element.js';
+import {AppCreateAccountPage} from '../top-level-pages/app-create-account-page.element.js';
+import {AppResetPasswordPage} from '../top-level-pages/app-reset-password-page.element.js';
+import {AppVerify} from '../verify-code/app-verify.element.js';
 import {AppFooter} from './app-footer.element.js';
 import {AppHeader} from './app-header.element.js';
 
@@ -52,7 +55,7 @@ export const AppWebsite = defineElementNoInputs({
             display: flex;
             flex-direction: column;
             align-items: stretch;
-            min-height: calc(100vh - ${footerMargin}px);
+            min-height: calc(100vh - ${footerMargin + 3}px);
         }
 
         .page-wrapper > *:last-child {
@@ -105,23 +108,33 @@ export const AppWebsite = defineElementNoInputs({
             ? html`
                   <${AppApp.assign(state)}></${AppApp}>
               `
-            : matchesPath(
-                    frontendState.currentRoute,
-                    frontendPathTree.paths.children.verify.fullPaths,
-                )
+            : stateHasPath(state, frontendPathTree.paths.children['create-account'].fullPaths)
               ? html`
-                    <${AppVerification.assign(state)}></${AppVerification}>
+                    <${AppCreateAccountPage.assign(state)}></${AppCreateAccountPage}>
                 `
-              : html`
-                    <${AppLandingPage.assign({
-                        router: state.router,
-                    })}></${AppLandingPage}>
-                `;
+              : stateHasPath(state, frontendPathTree.paths.children['reset-password'].fullPaths)
+                ? html`
+                      <${AppResetPasswordPage.assign(state)}></${AppResetPasswordPage}>
+                  `
+                : stateHasPath(state, frontendPathTree.paths.children.verify.fullPaths)
+                  ? html`
+                        <${AppVerify.assign(state)}></${AppVerify}>
+                    `
+                  : stateHasPath(state, frontendPathTree.paths.children.design.fullPaths)
+                    ? html`
+                          <${AppDesign.assign(state)}></${AppDesign}>
+                      `
+                    : html`
+                          <${AppLandingPage.assign({
+                              router: state.router,
+                          })}></${AppLandingPage}>
+                      `;
 
         return html`
             <div
                 class="everything-wrapper"
                 ${listen(LogOutEvent, () => {
+                    void state.api.lastResolvedValue?.endpoints['/unauthorized'].fetch();
                     wipeCurrentCsrfToken();
                     frontendState.user.setValue(undefined);
                     frontendState.router.setRoute({

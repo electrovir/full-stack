@@ -14,13 +14,14 @@
         "test:update": "npm test update"
     },
     "dependencies": {
-        "@augment-vir/assert": "^31.14.1",
+        "@augment-vir/assert": "^31.20.0",
+        "@augment-vir/node": "^31.20.0",
         "@evir/common": "*",
         "date-vir": "^7.3.1"
     },
     "devDependencies": {
-        "@augment-vir/test": "^31.14.1",
-        "@types/node": "^22.14.1"
+        "@augment-vir/test": "^31.20.0",
+        "@types/node": "^22.15.21"
     },
     "engines": {
         "node": ">=22"

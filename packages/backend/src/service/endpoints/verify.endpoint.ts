@@ -1,11 +1,12 @@
 import {HttpStatus} from '@augment-vir/common';
-import {EmailCodeType, preparePassword, type TemplateService} from '@evir/common';
+import {EmailCodeType, preparePassword, type BackendService} from '@evir/common';
 import {
     type EndpointImplementationOutput,
     type EndpointImplementationParams,
 } from '@rest-vir/implement-service';
 import {doesPasswordMatchHash} from 'auth-vir';
 import {createUtcFullDate, diffDates, getNowInIsoString, getNowInUtcTimezone} from 'date-vir';
+import {type OutgoingHttpHeaders} from 'node:http';
 import {normalizeEmailAddress} from 'parse-email-address';
 import {type BackendContext} from '../create-backend-context.js';
 
@@ -14,8 +15,10 @@ export async function verify(
     {
         context,
         requestData,
-    }: EndpointImplementationParams<BackendContext, TemplateService['endpoints']['/verify']>,
-): Promise<EndpointImplementationOutput<TemplateService['endpoints']['/verify']['ResponseType']>> {
+        requestHeaders,
+        service,
+    }: EndpointImplementationParams<BackendContext, BackendService['endpoints']['/verify']>,
+): Promise<EndpointImplementationOutput<BackendService['endpoints']['/verify']['ResponseType']>> {
     const existingCode = await context.prismaClient.emailCode.findFirst({
         where: {
             id: requestData.id,
@@ -66,7 +69,17 @@ export async function verify(
         if (existingCode.codeType === EmailCodeType.AccountVerification) {
             if (existingCode.user.accountVerifiedAt) {
                 /** Account already verified. */
+            } else if (context.authenticatedUser) {
+                return {
+                    statusCode: HttpStatus.BadRequest,
+                    responseErrorMessage: 'Already logged in',
+                };
             } else {
+                const signUpUserId = await context.authClient.getCookieUserId({
+                    headers: requestHeaders,
+                    isSignUpCookie: true,
+                });
+
                 await context.prismaClient.user.update({
                     where: {
                         id: existingCode.user.id,
@@ -84,8 +97,19 @@ export async function verify(
                     },
                 });
 
+                const headers: OutgoingHttpHeaders =
+                    signUpUserId === existingCode.user.id
+                        ? await context.authClient.createSuccessfulCookieHeaders({
+                              isSignUpCookie: false,
+                              requestHeaders,
+                              serviceOrigin: service.serviceOrigin,
+                              userId: existingCode.user.id,
+                          })
+                        : {};
+
                 return {
                     statusCode: HttpStatus.Ok,
+                    headers,
                 };
             }
         } else if (existingCode.codeType === EmailCodeType.PasswordReset) {
@@ -200,5 +224,12 @@ export async function verify(
 
     return {
         statusCode: HttpStatus.BadRequest,
+        headers: {
+            'set-cookie': (
+                await context.authClient.createLogoutHeaders(service.serviceOrigin, {
+                    isSignUpCookie: true,
+                })
+            )['set-cookie'],
+        },
     };
 }

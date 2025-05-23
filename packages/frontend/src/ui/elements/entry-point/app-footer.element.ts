@@ -59,7 +59,7 @@ export const AppFooter = defineElementNoInputs({
                             <a href="#">Terms of Service</a>
                         </div>
                     </div>
-                    <p>© Example 2025</p>
+                    <p>© electrovir 2025</p>
                 </div>
             </footer>
         `;

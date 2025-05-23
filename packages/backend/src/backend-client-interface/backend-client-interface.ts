@@ -1,9 +1,9 @@
 import {type UniversalTestContext} from '@augment-vir/test';
-import {DeployEnv} from '@evir/common';
+import {type DeployEnv} from '@evir/common';
 import {defaultBackendConfig, type BackendConfig} from '@evir/common-backend';
-import {parseJwtKeys} from 'auth-vir';
+import {AuthClient} from './auth-client.js';
 import {EmailClient} from './email-client.js';
-import {createPrismaClient} from './prisma-client/prisma-client.js';
+import {createPrismaClient} from './prisma-client.js';
 import {createSecretsClient} from './secrets-client/secrets-client.js';
 
 export type BackendClientInterfaceParams = {
@@ -23,7 +23,14 @@ export async function createBackendClientInterface({
 }: Readonly<BackendClientInterfaceParams>) {
     const secretsClient = await createSecretsClient(deployEnv, backendConfig);
     const prismaClient = await createPrismaClient(
-        deployEnv === DeployEnv.Dev ? {dev: testContext} : {nonDev: secretsClient},
+        testContext
+            ? {
+                  test: testContext,
+              }
+            : {
+                  secretsClient,
+                  env: deployEnv,
+              },
     );
 
     return {
@@ -34,15 +41,8 @@ export async function createBackendClientInterface({
             releaseName,
             backendConfig,
         },
-        jwtClient: {
-            jwtParams: {
-                jwtKeys: await parseJwtKeys(secretsClient.get.jwtKeys),
-                audience: 'server-context',
-                issuer: 'server-auth',
-                jwtDuration: backendConfig.authCookieDuration,
-            },
-        },
-        emailClient: new EmailClient(deployEnv, prismaClient, backendConfig),
+        authClient: new AuthClient(secretsClient, backendConfig, deployEnv),
+        emailClient: new EmailClient(deployEnv, prismaClient, secretsClient, backendConfig),
     };
 }
 

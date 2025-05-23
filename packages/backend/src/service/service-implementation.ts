@@ -1,5 +1,11 @@
 import {selectFrom} from '@augment-vir/common';
-import {defineTemplateService, DeployEnv, EmailCodeType} from '@evir/common';
+import {
+    defineBackendService,
+    DeployEnv,
+    EmailCodeType,
+    HeaderName,
+    UserStatusHeaderValue,
+} from '@evir/common';
 import {HttpStatus, implementService, type ContextInitOutput} from '@rest-vir/implement-service';
 import {csrfTokenHeaderName} from 'auth-vir';
 import {type BackendClientInterface} from '../backend-client-interface/backend-client-interface.js';
@@ -9,11 +15,11 @@ import {signUp} from './endpoints/sign-up.endpoint.js';
 import {updateEmailAddress} from './endpoints/update-email-address.endpoint.js';
 import {verify} from './endpoints/verify.endpoint.js';
 
-export function implementTemplateService(backendClientInterface: Readonly<BackendClientInterface>) {
-    const service = defineTemplateService(backendClientInterface.envClient.deployEnv);
+export function implementBackend(backendClientInterface: Readonly<BackendClientInterface>) {
+    const service = defineBackendService(backendClientInterface.envClient.deployEnv);
     return implementService({
         service,
-        customHeaders: [csrfTokenHeaderName],
+        customHeaders: Object.values(HeaderName),
         async createContext({
             requestHeaders,
             endpointDefinition,
@@ -32,6 +38,48 @@ export function implementTemplateService(backendClientInterface: Readonly<Backen
             );
         },
     })({
+        async postHook({originalStatus, requestHeaders, response}) {
+            if (originalStatus === HttpStatus.Unauthorized) {
+                const hasSignUpCookie =
+                    !response.getHeader('set-cookie') &&
+                    !!(await backendClientInterface.authClient.getCookieUserId({
+                        headers: requestHeaders,
+                        isSignUpCookie: true,
+                    }));
+
+                /**
+                 * Set the user status header so the frontend doesn't clear the CSRF token when a
+                 * valid sign up cookie exists.
+                 */
+                const userStatusHeaders = hasSignUpCookie
+                    ? {
+                          [HeaderName.UserStatus]: UserStatusHeaderValue.SignUp,
+                      }
+                    : undefined;
+
+                const logoutCookieHeaders =
+                    await backendClientInterface.authClient.createLogoutHeaders(
+                        service.serviceOrigin,
+                        hasSignUpCookie ? {isSignUpCookie: false} : {allCookies: true},
+                    );
+
+                const removeCsrfTokenHeader = hasSignUpCookie
+                    ? undefined
+                    : {
+                          [csrfTokenHeaderName]: logoutCookieHeaders[csrfTokenHeaderName],
+                      };
+
+                return {
+                    headers: {
+                        'set-cookie': logoutCookieHeaders['set-cookie'],
+                        ...removeCsrfTokenHeader,
+                        ...userStatusHeaders,
+                    },
+                };
+            }
+
+            return undefined;
+        },
         endpoints: {
             '/health'() {
                 return {
@@ -43,6 +91,11 @@ export function implementTemplateService(backendClientInterface: Readonly<Backen
                 return {
                     statusCode: HttpStatus.Ok,
                     responseData: 'ok',
+                };
+            },
+            '/unauthorized'() {
+                return {
+                    statusCode: HttpStatus.Unauthorized,
                 };
             },
             async '/reset-password'({context, requestData, request, log}) {

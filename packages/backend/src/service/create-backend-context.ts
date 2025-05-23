@@ -1,9 +1,9 @@
 import {HttpStatus, randomInteger, wait, type SelectFrom} from '@augment-vir/common';
-import {type FullModel, type TemplateService} from '@evir/common';
+import {type BackendService, type FullModel} from '@evir/common';
 import {type EndpointDefinition} from '@rest-vir/define-service';
 import {type ContextInit} from '@rest-vir/implement-service';
-import {extractUserIdFromRequestHeaders} from 'auth-vir';
 import {type IncomingHttpHeaders} from 'node:http';
+import {InvalidId} from '../backend-client-interface/auth-client.js';
 import {type BackendClientInterface} from '../backend-client-interface/backend-client-interface.js';
 
 export type BackendContext = BackendClientInterface & {
@@ -36,7 +36,8 @@ const endpointAuth: Record<string, Auth> = {
     '/update-email-address': Auth.Required,
     '/user': Auth.Required,
     '/verify': Auth.Any,
-} satisfies Record<keyof TemplateService['endpoints'], Auth>;
+    '/unauthorized': Auth.Any,
+} satisfies Record<keyof BackendService['endpoints'], Auth>;
 
 export async function createBackendContext(
     backendClientInterface: Readonly<BackendClientInterface>,
@@ -48,10 +49,18 @@ export async function createBackendContext(
      *
      * @deprecated Unsafe
      */
-    const _unsafe_authenticatedUserId = await extractUserIdFromRequestHeaders(
-        requestHeaders,
-        backendClientInterface.jwtClient.jwtParams,
-    );
+    const _unsafe_authenticatedUserId = await backendClientInterface.authClient.getCookieUserId({
+        headers: requestHeaders,
+    });
+
+    // eslint-disable-next-line sonarjs/deprecation, @typescript-eslint/no-deprecated
+    if (_unsafe_authenticatedUserId === InvalidId) {
+        return {
+            reject: {
+                statusCode: HttpStatus.Unauthorized,
+            },
+        };
+    }
 
     const authenticatedUser =
         // eslint-disable-next-line sonarjs/deprecation, @typescript-eslint/no-deprecated

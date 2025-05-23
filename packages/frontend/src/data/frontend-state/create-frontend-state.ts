@@ -1,6 +1,6 @@
 import {DeferredPromise} from '@augment-vir/common';
 import {
-    type TemplateServiceApi,
+    type BackendApi,
     defaultFrontendRoute,
     defaultUniversalConfig,
     sanitizeRoute,
@@ -14,7 +14,7 @@ import {loadUser} from './load-user.js';
 export function createFrontendState() {
     const deployEnv = determineFrontendDeployEnv(window.location.hostname);
 
-    const deferredApi = new DeferredPromise<TemplateServiceApi>();
+    const deferredApi = new DeferredPromise<BackendApi>();
 
     const asyncUser = asyncProp({
         defaultValue: loadUser(deferredApi.promise),

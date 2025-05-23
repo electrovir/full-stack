@@ -1,9 +1,10 @@
 import {checkWrap} from '@augment-vir/assert';
+import {log} from '@augment-vir/common';
 import {extractRelevantArgs, runShellCommand} from '@augment-vir/node';
 import {DeployEnv} from '@evir/common';
 import {startService} from '@rest-vir/run-service';
 import {createBackendClientInterface} from './backend-client-interface/backend-client-interface.js';
-import {implementTemplateService} from './service/service-implementation.js';
+import {implementBackend} from './service/service-implementation.js';
 
 async function parseCliArgs() {
     const relevantArgs = extractRelevantArgs({
@@ -25,8 +26,11 @@ async function parseCliArgs() {
 }
 
 const cliArgs = await parseCliArgs();
+log.faint('Starting backend...');
+log.info(`Release: ${cliArgs.releaseName}`);
+log.info(`Env: ${cliArgs.deployEnv}`);
 const backendClientInterface = await createBackendClientInterface(cliArgs);
-const implementedService = implementTemplateService(backendClientInterface);
+const implementedService = implementBackend(backendClientInterface);
 
 await startService(
     implementedService,

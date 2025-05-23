@@ -1,10 +1,10 @@
-import {join, resolve} from 'node:path';
+import {monoRepoDirPath, notCommittedDirPath} from '@evir/database';
+import {join} from 'node:path';
 
-export const monoRepoDirPath = resolve(import.meta.dirname, '..', '..', '..');
-export const notCommittedDirPath = join(monoRepoDirPath, '.not-committed');
+export * from '@evir/database/src/database-paths.js';
+
 export const secretsFilePath = join(notCommittedDirPath, 'secrets.json');
 export const packageDirPaths = {
     commonBacked: join(monoRepoDirPath, 'packages', 'common-backend'),
     database: join(monoRepoDirPath, 'packages', 'database'),
 };
-export const prismaSchemaFilePath = join(packageDirPaths.database, 'prisma', 'schema.prisma');

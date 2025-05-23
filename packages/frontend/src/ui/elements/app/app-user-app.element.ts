@@ -1,10 +1,10 @@
 import {type frontendPathTree} from '@evir/common';
 import {css, defineElement, html} from 'element-vir';
-import type {FullyResolvedFrontendState} from '../../../data/frontend-state/frontend-state.js';
+import {type FullyResolvedFrontendState} from '../../../data/frontend-state/frontend-state.js';
 import {contentWidthCss} from '../../styles/styles.js';
 
 export const AppUserApp = defineElement<
-    FullyResolvedFrontendState<typeof frontendPathTree.paths.children.app.fullPaths, true>
+    FullyResolvedFrontendState<typeof frontendPathTree.paths.children.app.PathsType, true>
 >()({
     tagName: 'app-user-app',
     styles: css`

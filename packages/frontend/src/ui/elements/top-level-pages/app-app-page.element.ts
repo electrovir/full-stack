@@ -7,12 +7,12 @@ import {
     type PendingFrontendState,
 } from '../../../data/frontend-state/frontend-state.js';
 import {appCssVars} from '../../styles/css-vars.js';
-import {errorCss} from '../../styles/styles.js';
-import {AppSignUp} from '../sign-in/app-sign-up.element.js';
-import {AppUserApp} from './app-user-app.element.js';
+import {AppUserApp} from '../app/app-user-app.element.js';
+import {AppError} from '../common/app-error.element.js';
+import {AppSignIn} from '../sign-in/app-sign-in.element.js';
 
 export const AppApp = defineElement<
-    PendingFrontendState<typeof frontendPathTree.paths.children.app.fullPaths>
+    PendingFrontendState<typeof frontendPathTree.paths.children.app.PathsType>
 >()({
     tagName: 'app-app',
     styles: css`
@@ -22,18 +22,13 @@ export const AppApp = defineElement<
             align-items: center;
             container-type: inline-size;
         }
-
-        .error {
-            ${errorCss}
-        }
-
         ${AppUserApp} {
             flex-grow: 1;
             align-self: stretch;
         }
 
-        ${AppSignUp} {
-            margin-top: 24px;
+        ${AppSignIn} {
+            margin-top: ${appCssVars['standard-header-margin'].value};
         }
 
         @container (max-width: 800px) {
@@ -51,13 +46,13 @@ export const AppApp = defineElement<
             `;
         } else if (resolvedState.error) {
             return html`
-                <p class="error">${extractErrorMessage(resolvedState.error)}</p>
+                <${AppError}><p>${extractErrorMessage(resolvedState.error)}</p></${AppError}>
             `;
         }
 
         if (resolvedState.resolvedNoUser) {
             return html`
-                <${AppSignUp.assign(resolvedState.resolvedNoUser)}></${AppSignUp}>
+                <${AppSignIn.assign(resolvedState.resolvedNoUser)}></${AppSignIn}>
             `;
         }
 

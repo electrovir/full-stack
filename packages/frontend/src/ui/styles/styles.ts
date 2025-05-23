@@ -7,8 +7,3 @@ export const contentWidthCss = css`
     box-sizing: border-box;
     width: ${contentWidth}px;
 `;
-
-export const errorCss = css`
-    font-weight: bold;
-    color: red;
-`;

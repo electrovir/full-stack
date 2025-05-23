@@ -3,7 +3,7 @@ import {resolve} from 'node:path';
 
 export default defineConfig(
     {
-        forGitHubPages: true,
+        forGitHubPages: false,
         packageDirPath: resolve(import.meta.dirname, '..'),
     },
     (baseConfig) => {

@@ -3,17 +3,17 @@ import {defineShape, enumShape, exact, optional, or} from 'object-shape-tester';
 import {parseUrl} from 'url-vir';
 import {DeployEnv} from './deploy-env.js';
 import {EmailCodeType} from './prisma-types.js';
+import {defaultUniversalConfig} from './universal-config.js';
 
-const productionHost = 'example.com';
 const servicePort = 3932;
 
 const hostNames: Record<DeployEnv, string> = {
     [DeployEnv.Dev]: 'localhost',
-    [DeployEnv.Staging]: `staging.${productionHost}`,
-    [DeployEnv.Prod]: productionHost,
+    [DeployEnv.Staging]: `staging.${defaultUniversalConfig.productionHost}`,
+    [DeployEnv.Prod]: defaultUniversalConfig.productionHost,
 };
 
-export const templateServiceConfig = {
+export const backendServiceConfig = {
     clientOriginRequirements: {
         [DeployEnv.Dev](origin: string | undefined) {
             return !!origin && parseUrl(origin).hostname === 'localhost';
@@ -40,14 +40,14 @@ export const userResponseShape = defineShape(
 
 export type UserResponse = typeof userResponseShape.runtimeType;
 
-export type TemplateService = ReturnType<typeof defineTemplateService>;
-export type TemplateServiceApi = RestVirApi<TemplateService>;
+export type BackendService = ReturnType<typeof defineBackendService>;
+export type BackendApi = RestVirApi<BackendService>;
 
-export function defineTemplateService(deployEnv: DeployEnv) {
+export function defineBackendService(deployEnv: DeployEnv) {
     return defineService({
-        serviceName: 'template-service',
-        requiredClientOrigin: templateServiceConfig.clientOriginRequirements[deployEnv],
-        serviceOrigin: templateServiceConfig.serviceOrigins[deployEnv],
+        serviceName: 'backend-api',
+        requiredClientOrigin: backendServiceConfig.clientOriginRequirements[deployEnv],
+        serviceOrigin: backendServiceConfig.serviceOrigins[deployEnv],
         endpoints: {
             /** This endpoint should always be first so that it is used by the dev port scanner. */
             '/health': {
@@ -66,6 +66,14 @@ export function defineTemplateService(deployEnv: DeployEnv) {
                 requestDataShape: undefined,
                 responseDataShape: exact('ok'),
                 requiredClientOrigin: AnyOrigin,
+            },
+            /** This endpoint always returns an unauthorized response. */
+            '/unauthorized': {
+                methods: {
+                    [HttpMethod.Get]: true,
+                },
+                requestDataShape: undefined,
+                responseDataShape: undefined,
             },
             '/reset-password': {
                 methods: {

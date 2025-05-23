@@ -1,10 +1,10 @@
 import {HttpStatus, omitObjectKeys, selectFrom} from '@augment-vir/common';
-import {DeployEnv, EmailCodeType, type TemplateService} from '@evir/common';
+import {EmailCodeType, type BackendService} from '@evir/common';
 import {
     type EndpointImplementationOutput,
     type EndpointImplementationParams,
 } from '@rest-vir/implement-service';
-import {doesPasswordMatchHash, generateSuccessfulLoginHeaders} from 'auth-vir';
+import {doesPasswordMatchHash} from 'auth-vir';
 import {type BackendContext} from '../create-backend-context.js';
 
 export async function login(
@@ -12,10 +12,10 @@ export async function login(
     {
         context,
         requestData,
-        request,
+        requestHeaders,
         service,
-    }: EndpointImplementationParams<BackendContext, TemplateService['endpoints']['/login']>,
-): Promise<EndpointImplementationOutput<TemplateService['endpoints']['/login']['ResponseType']>> {
+    }: EndpointImplementationParams<BackendContext, BackendService['endpoints']['/login']>,
+): Promise<EndpointImplementationOutput<BackendService['endpoints']['/login']['ResponseType']>> {
     const userByEmail = await context.prismaClient.user.findFirst({
         where: {
             emailAddress: requestData.emailAddress,
@@ -42,11 +42,11 @@ export async function login(
     }
 
     if (userByEmail.accountVerifiedAt) {
-        const headers = await generateSuccessfulLoginHeaders(userByEmail.id, {
-            cookieDuration: context.envClient.backendConfig.authCookieDuration,
-            hostOrigin: service.serviceOrigin,
-            jwtParams: context.jwtClient.jwtParams,
-            isDev: context.envClient.deployEnv === DeployEnv.Dev,
+        const headers = await context.authClient.createSuccessfulCookieHeaders({
+            userId: userByEmail.id,
+            serviceOrigin: service.serviceOrigin,
+            isSignUpCookie: false,
+            requestHeaders,
         });
 
         return {
@@ -62,7 +62,7 @@ export async function login(
          * verified.
          */
         void context.emailClient.sendVerificationCode(
-            request.headers.origin || '',
+            requestHeaders.origin || '',
             omitObjectKeys(userByEmail, ['password']),
             EmailCodeType.AccountVerification,
         );

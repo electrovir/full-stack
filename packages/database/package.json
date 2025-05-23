@@ -7,25 +7,30 @@
     "types": "src/index.ts",
     "scripts": {
         "compile": "virmator compile",
-        "postinstall": "npm run prisma generate",
-        "prisma": "npx prisma-pglite",
+        "db:gen": "rm -rf src/generated && prisma generate --no-hints && tsx src/prisma/prisma-map.script.ts",
+        "db:reset": "rm -rf ../../.not-committed/dev",
+        "postinstall": "db:gen || true",
         "start": "tsx src/index.ts",
         "test": "virmator test node",
         "test:coverage": "npm run test",
         "test:update": "npm test update"
     },
     "dependencies": {
-        "@augment-vir/assert": "^31.14.1",
-        "@augment-vir/common": "^31.14.1",
-        "@prisma/client": "^6.6.0",
+        "@augment-vir/assert": "^31.20.0",
+        "@augment-vir/common": "^31.20.0",
+        "@augment-vir/node": "^31.20.0",
+        "@prisma/client": "^6.8.2",
+        "auth-vir": "^1.2.1",
         "date-vir": "^7.3.1",
-        "prisma": "^6.6.0",
-        "prisma-frontend": "^0.2.0",
-        "prisma-map": "^1.0.4",
-        "prisma-pglite": "^0.0.2"
+        "prisma": "^6.8.2",
+        "prisma-map": "^2.0.3",
+        "prisma-pglite": "^0.1.0",
+        "url-vir": "^2.1.3"
     },
     "devDependencies": {
-        "@augment-vir/test": "^31.14.1"
+        "@augment-vir/test": "^31.20.0",
+        "@types/node": "^22.15.21",
+        "type-fest": "^4.41.0"
     },
     "engines": {
         "node": ">=22"

@@ -9,6 +9,11 @@ export const frontendPathTree = new PathTree({
             allowBare: true,
             children: {},
         },
+        design: {
+            anyChildren: true,
+        },
+        'reset-password': {},
+        'create-account': {},
         verify: {},
         legal: {},
     },

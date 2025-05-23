@@ -7,13 +7,13 @@ export const defaultBackendConfig = {
     },
     /** Addresses that emails will be sent from in deployed environments. */
     fromEmailAddress: {
-        [DeployEnv.Prod]: 'noreply@example.com',
-        [DeployEnv.Staging]: 'noreply@staging.example.com',
+        [DeployEnv.Prod]: `support@${defaultUniversalConfig.productionHost}`,
+        [DeployEnv.Staging]: `support@staging.${defaultUniversalConfig.productionHost}`,
     },
     /** Frontend origins for deployed environments. */
     clientOrigin: {
-        [DeployEnv.Prod]: 'https://example.com',
-        [DeployEnv.Staging]: 'https://staging.example.com',
+        [DeployEnv.Prod]: `https://${defaultUniversalConfig.productionHost}`,
+        [DeployEnv.Staging]: `https://staging.${defaultUniversalConfig.productionHost}`,
     },
     authCookieDuration: {
         hours: 2,

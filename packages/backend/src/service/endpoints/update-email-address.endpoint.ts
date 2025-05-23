@@ -1,5 +1,5 @@
 import {HttpStatus} from '@augment-vir/common';
-import {EmailCodeType, getOffsetDbTime, type TemplateService} from '@evir/common';
+import {EmailCodeType, getOffsetDbTime, type BackendService} from '@evir/common';
 import {
     type EndpointImplementationOutput,
     type EndpointImplementationParams,
@@ -15,11 +15,11 @@ export async function updateEmailAddress(
         requestHeaders,
     }: EndpointImplementationParams<
         BackendContext,
-        TemplateService['endpoints']['/update-email-address']
+        BackendService['endpoints']['/update-email-address']
     >,
 ): Promise<
     EndpointImplementationOutput<
-        TemplateService['endpoints']['/update-email-address']['ResponseType']
+        BackendService['endpoints']['/update-email-address']['ResponseType']
     >
 > {
     if (!context.authenticatedUser) {

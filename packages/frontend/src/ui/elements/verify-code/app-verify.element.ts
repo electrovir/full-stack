@@ -1,26 +1,30 @@
 import {extractErrorMessage} from '@augment-vir/common';
-import {EmailCodeType} from '@evir/common';
+import {EmailCodeType, frontendPathTree, type BackendApi} from '@evir/common';
+import {handleAuthResponse} from 'auth-vir';
 import {
     asyncProp,
-    type AsyncProp,
     css,
     defineElement,
     html,
+    type AsyncProp,
     type HTMLTemplateResult,
-    listen,
-    renderIf,
 } from 'element-vir';
 import {noNativeSpacing} from 'vira';
 import {type PendingFrontendState} from '../../../data/frontend-state/frontend-state.js';
+import {loadUser} from '../../../data/frontend-state/load-user.js';
+import {ChangeRouteEvent} from '../../events/change-route.event.js';
+import {UserEditEvent} from '../../events/user-edit.event.js';
 import {appCssVars} from '../../styles/css-vars.js';
-import {errorCss} from '../../styles/styles.js';
-import {AppPasswordReset} from './app-password-reset.element.js';
-import {AppSignIn} from './app-sign-in.element.js';
+import {AppError} from '../common/app-error.element.js';
+import {AppSignIn} from '../sign-in/app-sign-in.element.js';
+import {AppEnterResetPassword} from './app-enter-reset-password.element.js';
 
-export const AppVerification = defineElement<
-    Readonly<Pick<PendingFrontendState, 'api' | 'currentRoute' | 'config' | 'debug'>>
+export const AppVerify = defineElement<
+    Readonly<
+        Pick<PendingFrontendState, 'api' | 'currentRoute' | 'config' | 'debug' | 'user' | 'router'>
+    >
 >()({
-    tagName: 'app-verification',
+    tagName: 'app-verify',
     styles: css`
         :host {
             display: flex;
@@ -47,10 +51,6 @@ export const AppVerification = defineElement<
             ${noNativeSpacing};
         }
 
-        .error {
-            ${errorCss};
-        }
-
         .error-wrapper {
             font-size: 1.2em;
         }
@@ -66,11 +66,10 @@ export const AppVerification = defineElement<
             verificationSubmission: asyncProp({
                 defaultValue: undefined as undefined | Readonly<Pick<Response, 'ok'>>,
             }),
-            passwordReset: false,
         };
     },
-    render({inputs, state, updateState}) {
-        const contentTemplate = createVerificationContentTemplate(inputs, state, updateState);
+    render({inputs, state, dispatch}) {
+        const contentTemplate = createVerificationContentTemplate(inputs, state, dispatch);
 
         return html`
             <div class="content">${contentTemplate}</div>
@@ -81,40 +80,43 @@ const codeFailureTemplates: Record<EmailCodeType, (errorMessage: string) => HTML
     [EmailCodeType.AccountVerification]() {
         return html`
             <p class="error-wrapper">
-                <span class="error">Failed to verify your email.</span>
+                <${AppError}><span>Failed to verify your email.</span></${AppError}>
                 <br />
                 <br />
-                If you already verified your email, sign in to access your account.
+                If you already verified your account, sign in to access your account.
                 <br />
-                If you need a new verification email, sign in to generate a new code.
+                If you need a new verification email, sign in again to generate a new code.
             </p>
         `;
     },
     [EmailCodeType.ChangedEmailVerification](errorMessage) {
         return html`
             <p class="error-wrapper">
-                <span class="error">
-                    Failed to verify your new email: ${errorMessage.trim() || 'Invalid code.'}
-                </span>
+                <${AppError}>
+                    <span>
+                        Failed to verify your new email: ${errorMessage.trim() || 'Invalid code.'}
+                    </span>
+                </${AppError}>
             </p>
         `;
     },
     [EmailCodeType.PasswordReset]() {
         return html`
             <p class="error-wrapper">
-                <span class="error">Invalid code.</span>
+                <${AppError}><span>Invalid code.</span></${AppError}>
             </p>
         `;
     },
 };
 
 function createVerificationContentTemplate(
-    inputs: Readonly<Pick<PendingFrontendState, 'api' | 'currentRoute' | 'config' | 'debug'>>,
+    inputs: Readonly<
+        Pick<PendingFrontendState, 'api' | 'currentRoute' | 'config' | 'debug' | 'user' | 'router'>
+    >,
     state: {
         verificationSubmission: AsyncProp<undefined | Readonly<Pick<Response, 'ok'>>, void>;
-        passwordReset: boolean;
     },
-    updateState: (newState: Partial<{passwordReset: boolean}>) => void,
+    dispatch: (event: Event) => void,
 ) {
     const code: string | undefined = inputs.currentRoute.search?.code[0];
     const codeId: string | undefined = inputs.currentRoute.search?.id[0];
@@ -153,35 +155,27 @@ function createVerificationContentTemplate(
     ) {
         if (codeType === EmailCodeType.AccountVerification) {
             return html`
-                ${renderIf(
-                    !state.passwordReset,
-                    html`
-                        <p class="success">
-                            Email successfully verified. Please sign in to access your account:
-                        </p>
-                    `,
-                )}
+                <p class="success">Email verified!</p>
                 <${AppSignIn.assign({
-                    showButtons: {signInOnly: true},
                     api: inputs.api.settledValue,
                     config: inputs.config,
-                    debug: inputs.debug,
-                })}
-                    ${listen(AppSignIn.events.passwordResetEmailSend, () => {
-                        updateState({passwordReset: true});
-                    })}
-                ></${AppSignIn}>
+                    router: inputs.router,
+                })}></${AppSignIn}>
             `;
         } else if (codeType === EmailCodeType.PasswordReset) {
             return html`
-                <${AppPasswordReset.assign({
-                    api: inputs.api.settledValue,
-                    config: inputs.config,
-                    debug: inputs.debug,
-                    codeId,
-                    code,
-                    codeType,
-                })}></${AppPasswordReset}>
+                <${AppEnterResetPassword.assign({
+                    emailCode: {
+                        code,
+                        codeId,
+                        codeType,
+                    },
+                    frontendState: {
+                        api: inputs.api.settledValue,
+                        config: inputs.config,
+                        router: inputs.router,
+                    },
+                })}></${AppEnterResetPassword}>
             `;
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         } else if (codeType === EmailCodeType.ChangedEmailVerification) {
@@ -190,30 +184,82 @@ function createVerificationContentTemplate(
             `;
         } else {
             return html`
-                <p class="error">'Unknown success template.</p>
+                <${AppError}><p>'Unknown success template.</p></${AppError}>
             `;
         }
     } else {
         state.verificationSubmission.setValue(
-            inputs.api.settledValue.endpoints['/verify']
-                .fetch({
-                    requestData: {
-                        id: codeId,
-                        code,
-                        codeType,
-                    },
-                })
-                .then((result) => {
-                    if (!result.ok) {
-                        throw new Error(result.data);
-                    }
-                    return {
-                        ok: result.ok,
-                    };
-                }),
+            sendVerifyRequest({
+                api: inputs.api.settledValue,
+                code,
+                codeId,
+                codeType,
+                dispatch,
+                inputs,
+            }),
         );
         return html`
             <p class="submitting">Verifying...</p>
         `;
     }
+}
+
+async function sendVerifyRequest({
+    inputs,
+    api,
+    codeId,
+    code,
+    codeType,
+    dispatch,
+}: {
+    inputs: Readonly<Pick<PendingFrontendState, 'user'>>;
+    api: BackendApi;
+    codeId: string;
+    code: string;
+    codeType: EmailCodeType;
+    dispatch: (event: Event) => void;
+}) {
+    /**
+     * Await the user here so that any cookies or CSRF tokens set by the below `'/verify'` endpoint
+     * call don't get wiped from the initial failed `'/user'` fetch.
+     */
+    await inputs.user.value;
+
+    const result = await api.endpoints['/verify'].fetch({
+        requestData: {
+            id: codeId,
+            code,
+            codeType,
+        },
+    });
+
+    if (!result.ok) {
+        throw new Error(result.data);
+    }
+
+    if (codeType === EmailCodeType.AccountVerification) {
+        try {
+            handleAuthResponse(result.response);
+            const user = await loadUser(api);
+
+            if (user) {
+                dispatch(new UserEditEvent(user));
+                dispatch(
+                    new ChangeRouteEvent({
+                        scrollToTop: true,
+                        paths: frontendPathTree.paths.children.app.fullPaths,
+                    }),
+                );
+            }
+        } catch {
+            /**
+             * Ignore failing to load auth, if the signup cookie wasn't set it will fail
+             * (intentionally).
+             */
+        }
+    }
+
+    return {
+        ok: result.ok,
+    };
 }

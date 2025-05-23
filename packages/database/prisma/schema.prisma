@@ -1,15 +1,8 @@
 generator jsClient {
-    provider        = "prisma-client-js"
-    previewFeatures = ["strictUndefinedChecks", "driverAdapters"]
-}
-
-generator jsFrontend {
-    provider = "prisma-frontend"
-}
-
-generator mappedClient {
-    provider = "prisma-map"
-    config   = "./prisma-map-config.ts"
+    provider        = "prisma-client"
+    previewFeatures = ["strictUndefinedChecks", "driverAdapters", "relationJoins", "queryCompiler"]
+    output          = "../src/generated"
+    moduleFormat    = "esm"
 }
 
 datasource db {
@@ -18,19 +11,20 @@ datasource db {
 }
 
 model User {
-    id        String   @id @default(cuid(2))
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+    id            String    @id @default(cuid(2))
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @default(now()) @updatedAt
+    deactivatedAt DateTime?
 
     /// Hashed and salted password.
     password                  String
     /// Email address is not unique because a user may deactivate their account and create a new one later.
     emailAddress              String
+    /// This must be kept in sync with the User `emailAddress` field. This is used to prevent multiple
+    /// users with the same email but with different casing or other extra email bits.
+    normalizedEmailAddress    String
     /// If the user changes their email address, it gets saved here until they verify the new email address.
     unverifiedNewEmailAddress String?
-    /// This must be kept in sync with the above `emailAddress` field. It is used to prevent multiple users with the same email but with different casing or other extra email bits.
-    normalizedEmailAddress    String
-    deactivatedAt             DateTime?
     accountVerifiedAt         DateTime?
 
     userActions UserAction[]
@@ -56,7 +50,8 @@ model EmailCode {
     codeType     EmailCodeType
     /// Indicates that this email code has been used. Codes cannot be used more than once.
     usedAt       DateTime?
-    /// The email address that this code was sent to. This might not exactly match the related user's email because users can modify their email address.
+    /// The email address that this code was sent to. This might not exactly match the related
+    /// user's current email address because users can modify their email address.
     emailAddress String
 
     user   User   @relation(fields: [userId], references: [id], onUpdate: Restrict, onDelete: Restrict)

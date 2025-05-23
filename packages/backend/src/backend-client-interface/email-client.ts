@@ -13,6 +13,7 @@ import {type PrismaClient} from '@evir/database';
 import {hashPassword} from 'auth-vir';
 import {type RequireExactlyOne} from 'type-fest';
 import {buildUrl} from 'url-vir';
+import {type SecretsClient} from './secrets-client/secrets-client.js';
 
 export type SendEmailParams = RequireExactlyOne<{
     toAddresses: string[];
@@ -35,6 +36,7 @@ export class EmailClient {
     constructor(
         protected readonly deployEnv: DeployEnv,
         protected readonly prismaClient: PrismaClient,
+        protected readonly secretsClient: SecretsClient,
         protected readonly backendConfig: Readonly<BackendConfig>,
     ) {}
 
@@ -82,7 +84,7 @@ export class EmailClient {
                 Destination: {
                     ToAddresses: toAddresses,
                 },
-                FromEmailAddress: `"${fromNameAddition[this.deployEnv] || ''}" <${this.backendConfig.fromEmailAddress[this.deployEnv]}>`,
+                FromEmailAddress: `"${this.backendConfig.universalConfig.companyProperName}${fromNameAddition[this.deployEnv] || ''}" <${this.backendConfig.fromEmailAddress[this.deployEnv]}>`,
             });
 
             await this.awsSesClient.send(sendEmailCommand);
