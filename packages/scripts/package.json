@@ -1,0 +1,26 @@
+{
+    "name": "@evir/scripts",
+    "private": true,
+    "sideEffects": false,
+    "type": "module",
+    "scripts": {
+        "compile": "virmator compile",
+        "deploy": "tsx src/deploy-backend.script.ts",
+        "test": "virmator test node",
+        "test:all": "npm test"
+    },
+    "dependencies": {
+        "@augment-vir/assert": "^31.68.1",
+        "@augment-vir/common": "^31.68.1",
+        "@augment-vir/node": "^31.68.1",
+        "@augment-vir/test": "^31.68.1",
+        "@evir/common-backend": "*",
+        "@inquirer/prompts": "^8.3.0",
+        "cli-vir": "^1.0.3",
+        "mono-vir": "^2.5.0",
+        "type-fest": "^5.4.4"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}

@@ -9,7 +9,6 @@
         "./dist-*/",
         "./dist/",
         "./node_modules/",
-        "./prisma/",
         "./test-files/",
         "src/all-files-for-code-coverage.test.ts"
     ],

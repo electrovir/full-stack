@@ -6,10 +6,7 @@ import {
     toUtcIsoString,
 } from 'date-vir';
 
-/**
- * Easily get date and times offset from the current date and time in a format that Prisma client
- * will accept.
- */
-export function getOffsetDbTime(offset: Readonly<AnyDuration>): UtcIsoString {
+/** Easily get date and time offsets from the current time in the `UtcIsoString` format. */
+export function getOffsetDateInIso(offset: Readonly<AnyDuration>): UtcIsoString {
     return toUtcIsoString(calculateRelativeDate(getNowInUtcTimezone(), offset));
 }

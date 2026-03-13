@@ -1,20 +1,16 @@
-import {extractErrorMessage} from '@augment-vir/common';
 import {type FrontendPaths, frontendPathTree} from '@evir/common';
 import {ElementBookApp, type ValidBookPaths} from 'element-book';
-import {css, defineElement, html, listen} from 'element-vir';
-import {LoaderAnimated24Icon, ViraIcon} from 'vira';
-import {
-    type PendingFrontendState,
-    getFrontendResolutionState,
-} from '../../../data/frontend-state/frontend-state.js';
+import {css, html, listen} from 'element-vir';
+import {type FrontendState} from '../../../data/frontend-state/frontend-state.js';
 import {ChangeRouteEvent} from '../../events/change-route.event.js';
-import {AppError} from '../common/app-error.element.js';
-import {allPages} from './all-book-pages.js';
-import {type BookGlobals} from './book-globals.js';
+import {appColors} from '../../styles/color-theme.js';
+import {defineAppElement} from '../common/define-app-element.js';
+import {allBookPages} from './all-book-pages.js';
+import {type DesignGlobals} from './top-level-book-pages.js';
 
-export const AppDesign = defineElement<
-    PendingFrontendState<typeof frontendPathTree.paths.children.design.PathsType>
->()({
+export const AppDesign = defineAppElement<{
+    frontendState: Readonly<FrontendState>;
+}>()({
     tagName: 'app-design',
     styles: css`
         :host {
@@ -27,24 +23,16 @@ export const AppDesign = defineElement<
         }
     `,
     render({inputs, dispatch}) {
-        const resolvedState = getFrontendResolutionState(inputs);
-
-        if (resolvedState.pending) {
-            return html`
-                <${ViraIcon.assign({icon: LoaderAnimated24Icon})}></${ViraIcon}>
-            `;
-        } else if (resolvedState.error) {
-            return html`
-                <${AppError}><p>${extractErrorMessage(resolvedState.error)}</p></${AppError}>
-            `;
-        }
-
         return html`
             <${ElementBookApp.assign({
-                pages: allPages,
-                elementBookRoutePaths: inputs.currentRoute.paths.slice(1) as ValidBookPaths,
-                themeColor: 'dodgerblue',
-                globalValues: resolvedState.resolved satisfies BookGlobals,
+                pages: allBookPages,
+                elementBookRoutePaths: inputs.frontendState.currentRoute.paths.slice(
+                    1,
+                ) as ValidBookPaths,
+                themeColor: appColors.colors['app-brand-primary'].foreground.default,
+                globalValues: {
+                    frontendState: inputs.frontendState,
+                } satisfies DesignGlobals,
             })}
                 ${listen(ElementBookApp.events.pathUpdate, (event) => {
                     dispatch(

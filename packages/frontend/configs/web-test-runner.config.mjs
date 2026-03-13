@@ -1,9 +1,10 @@
 import {defineConfig} from '@virmator/test/configs/web-test-runner.config.base.mjs';
 import {dirname} from 'path';
+import portfinder from 'portfinder';
 import {fileURLToPath, pathToFileURL} from 'url';
 
 const baseConfig = defineConfig({
-    coveragePercent: 100,
+    coveragePercent: 0,
     packageRootDirPath: dirname(dirname(fileURLToPath(import.meta.url))),
     extraScreenshotOptions: {},
 });
@@ -11,7 +12,7 @@ const baseConfig = defineConfig({
 /** @type {import('@web/test-runner').TestRunnerConfig} */
 const webTestRunnerConfig = {
     ...baseConfig,
-    port: 8101,
+    port: await portfinder.getPortPromise({port: 8300, stopPort: 8399}),
 };
 
 export default webTestRunnerConfig;

@@ -9,17 +9,21 @@ import {
     utcIsoStringShape,
 } from 'date-vir';
 import {assertValidShape} from 'object-shape-tester';
-import {getOffsetDbTime} from './date.js';
+import {getOffsetDateInIso} from './date.js';
 
-describe(getOffsetDbTime.name, () => {
+describe(getOffsetDateInIso.name, () => {
     it('produces an offset time', () => {
-        const offset1: string = getOffsetDbTime({minutes: -5});
+        const offset1: string = getOffsetDateInIso({
+            minutes: -5,
+        });
         const offset2: string = toUtcIsoString(
-            calculateRelativeDate(getNowInUtcTimezone(), {minutes: -5}),
+            calculateRelativeDate(getNowInUtcTimezone(), {
+                minutes: -5,
+            }),
         );
 
-        assertValidShape(offset1, utcIsoStringShape);
-        assertValidShape(offset2, utcIsoStringShape);
+        assertValidShape(offset1, utcIsoStringShape());
+        assertValidShape(offset2, utcIsoStringShape());
 
         assert.isApproximately(
             toTimestamp(createUtcFullDate(offset1)),

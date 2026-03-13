@@ -1,54 +1,50 @@
 import {defineBookPage} from 'element-book';
 import {html} from 'element-vir';
-import {type SetOptional} from 'type-fest';
-import {elementsPage} from '../design/top-level-pages.js';
-import {AppEmailSuccess, EmailSuccessType} from './app-email-success.element.js';
+import {EmailSuccessType} from '../../../data/email-success-type.js';
+import {elementsBookPage} from '../design/top-level-book-pages.js';
+import {AppEmailSuccess} from './app-email-success.element.js';
 
 const examples: {
     title: string;
-    inputs: SetOptional<typeof AppEmailSuccess.InputsType, 'emailAddress'>;
+    inputs: Readonly<Omit<typeof AppEmailSuccess.InputsType, 'frontendState'>>;
 }[] = [
     {
-        title: 'user created',
+        title: 'account created',
         inputs: {
-            successType: EmailSuccessType.UserCreated,
+            emailAddress: 'fake@example.com',
+            successType: EmailSuccessType.AccountCreated,
+            emailSentJustNow: true,
+        },
+    },
+    {
+        title: 'forgot password',
+        inputs: {
+            emailAddress: 'fake@example.com',
+            successType: EmailSuccessType.ForgotPassword,
+            emailSentJustNow: true,
         },
     },
     {
         title: 'password reset',
         inputs: {
+            emailAddress: 'fake@example.com',
             successType: EmailSuccessType.PasswordReset,
-        },
-    },
-    {
-        title: 'email change',
-        inputs: {
-            successType: EmailSuccessType.ChangeEmail,
-        },
-    },
-    {
-        title: 'specific email',
-        inputs: {
-            successType: EmailSuccessType.UserCreated,
-            emailAddress: 'your-name@example.com',
+            emailSentJustNow: true,
         },
     },
 ];
 
 export const appEmailSuccessBookPage = defineBookPage({
-    parent: elementsPage,
-    descriptionParagraphs: [
-        'Email address will be populated based on the current user account or the account information they provided.',
-    ],
+    parent: elementsBookPage,
     title: AppEmailSuccess.tagName,
     defineExamples({defineExample}) {
         examples.forEach((example) => {
             defineExample({
                 title: example.title,
-                render() {
+                render({controls}) {
                     return html`
                         <${AppEmailSuccess.assign({
-                            emailAddress: 'user@example.com',
+                            ...controls,
                             ...example.inputs,
                         })}></${AppEmailSuccess}>
                     `;

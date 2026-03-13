@@ -16,6 +16,9 @@
     "references": [
         {
             "path": "../common"
+        },
+        {
+            "path": "../e2e"
         }
     ]
 }

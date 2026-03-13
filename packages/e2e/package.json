@@ -1,0 +1,32 @@
+{
+    "name": "@evir/e2e",
+    "private": true,
+    "sideEffects": false,
+    "type": "module",
+    "main": "src/index.mock.ts",
+    "module": "src/index.mock.ts",
+    "types": "src/index.mock.ts",
+    "scripts": {
+        "compile": "virmator compile",
+        "start": "bash src/run-playwright.sh codegen",
+        "test": "bash src/run-playwright.sh test",
+        "test:all": "exit 0;",
+        "test:ui": "npm test -- --ui --headed",
+        "test:update": "npm test -- --update-snapshots"
+    },
+    "dependencies": {
+        "@augment-vir/assert": "^31.68.1",
+        "@augment-vir/common": "^31.68.1",
+        "@augment-vir/node": "^31.68.1",
+        "@augment-vir/test": "^31.68.1",
+        "@evir/common-backend": "*",
+        "@playwright/test": "1.56.1",
+        "auth-vir": "^3.1.0",
+        "playwright": "1.56.1",
+        "spa-router-vir": "^6.4.1",
+        "url-vir": "^2.1.7"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}

@@ -1,43 +1,37 @@
-import {checkWrap} from '@augment-vir/assert';
 import {log} from '@augment-vir/common';
-import {extractRelevantArgs, runShellCommand} from '@augment-vir/node';
 import {DeployEnv} from '@evir/common';
+import {
+    BackendServiceKey,
+    createBackendClientInterface,
+    parseBackendCliArgs,
+} from '@evir/common-backend';
 import {startService} from '@rest-vir/run-service';
-import {createBackendClientInterface} from './backend-client-interface/backend-client-interface.js';
-import {implementBackend} from './service/service-implementation.js';
+import {implementBackend} from './backend-service-implementation.js';
 
-async function parseCliArgs() {
-    const relevantArgs = extractRelevantArgs({
-        binName: undefined,
-        fileName: import.meta.filename,
-        rawArgs: process.argv,
-    });
-
-    const deployEnv = checkWrap.isEnumValue(relevantArgs[0], DeployEnv) || DeployEnv.Dev;
-    const releaseName =
-        relevantArgs[1] ||
-        (await runShellCommand('git rev-parse HEAD')).stdout.trim() ||
-        'UNKNOWN_DEPLOY_NAME';
-
-    return {
-        deployEnv,
-        releaseName,
-    };
-}
-
-const cliArgs = await parseCliArgs();
 log.faint('Starting backend...');
-log.info(`Release: ${cliArgs.releaseName}`);
-log.info(`Env: ${cliArgs.deployEnv}`);
-const backendClientInterface = await createBackendClientInterface(cliArgs);
+const cliArgs = parseBackendCliArgs(process.argv, import.meta);
+const backendClientInterface = await createBackendClientInterface({
+    ...cliArgs,
+    test: cliArgs.testName,
+    serviceKey: BackendServiceKey.Backend,
+});
 const implementedService = implementBackend(backendClientInterface);
 
-await startService(
-    implementedService,
-    cliArgs.deployEnv === DeployEnv.Dev
+const output = await startService(implementedService, {
+    host: '0.0.0.0',
+    port:
+        cliArgs.port ||
+        backendClientInterface.backendEnvClient.universalConfig.services.backend.port,
+    lockPort: !!cliArgs.port,
+
+    ...(backendClientInterface.backendEnvClient.deployEnv === DeployEnv.Dev
         ? {
-              /** Backend PGlite databases do not support multiple connections. */
+              /** PGlite databases do not support multiple connections. */
               workerCount: 1,
           }
-        : {},
-);
+        : {}),
+});
+
+backendClientInterface.backendEnvClient.serverPort = output.port;
+
+log.faint('Backend started');

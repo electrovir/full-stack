@@ -1,21 +1,18 @@
 # full-stack
 
-A template for building a modern full stack app with:
+A full-stack web application template with a monorepo structure.
 
--   TypeScript in the frontend and backend
--   a full-type-safe backend API
--   user authentication with password resets and email verification
+## Usage
 
-## Usage steps
+After cloning this template, search the entire codebase for **`YOU SHOULD UPDATE THIS`** to find all the places that need to be customized for your project. These markers appear as comments in TypeScript, HTML, YAML, and other files.
 
-WIP.
+Some files (like `package.json` and `LICENSE-MIT`) don't support comments, so those customization points are listed below.
 
-1. Clone this repo
-2. Change licenses (if applicable)
-    1. Replace / remove the license property in `./package.json` in the mono-repo root.
-    2. Replace / remove the `./LICENSE-*` files.
-3. Modify names in `packages/common/src/universal-config.ts`.
-4. Modify names in `packages/common-backend/src/backend-config.ts`.
-5. Update the seed user in `packages/database/src/prisma/seed.ts`.
-6. Update the page name in `packages/frontend/src/index.html`
-7. Update the copyright name in `packages/frontend/src/ui/elements/entry-point/app-footer.element.ts`.
+### Files without comment support (update manually)
+
+| File                      | What to update                                                        |
+| ------------------------- | --------------------------------------------------------------------- |
+| `package.json` (root)     | `name`, `homepage`, `bugs`, `repository`, `license`, `author`         |
+| `packages/*/package.json` | npm scope (`@evir` -> your scope) in `name` and dependency references |
+| `LICENSE-MIT`             | Replace with your license                                             |
+| `LICENSE-CC0`             | Replace with your license                                             |

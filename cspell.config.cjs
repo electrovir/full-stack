@@ -5,13 +5,9 @@ module.exports = {
     ignorePaths: [
         ...baseConfig.ignorePaths,
         'packages/database/src/generated/',
+        'packages/frontend/build-size.html',
     ],
     words: [
         ...baseConfig.words,
-        'pglite',
-        'sesv2',
-        'cuid',
-        'dbname',
-        'aesgcm',
     ],
 };

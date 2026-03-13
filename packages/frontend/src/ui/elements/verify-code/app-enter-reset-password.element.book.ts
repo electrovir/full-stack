@@ -1,11 +1,12 @@
-import {EmailCodeType} from '@evir/common';
+import {applyBrand} from '@augment-vir/common';
+import {type EmailCode, EmailCodeType} from '@evir/common';
 import {defineBookPage} from 'element-book';
 import {html} from 'element-vir';
-import {elementsPage} from '../design/top-level-pages.js';
+import {elementsBookPage} from '../design/top-level-book-pages.js';
 import {AppEnterResetPassword} from './app-enter-reset-password.element.js';
 
 export const appEnterResetPasswordBookPage = defineBookPage({
-    parent: elementsPage,
+    parent: elementsBookPage,
     title: AppEnterResetPassword.tagName,
     defineExamples({defineExample}) {
         defineExample({
@@ -13,12 +14,12 @@ export const appEnterResetPasswordBookPage = defineBookPage({
             render({controls}) {
                 return html`
                     <${AppEnterResetPassword.assign({
+                        ...controls,
                         emailCode: {
                             code: 'code',
-                            codeId: 'code id',
+                            codeId: applyBrand<EmailCode['id']>('code id'),
                             codeType: EmailCodeType.PasswordReset,
                         },
-                        frontendState: controls,
                     })}></${AppEnterResetPassword}>
                 `;
             },

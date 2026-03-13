@@ -1,22 +1,50 @@
 import {describe, itCases} from '@augment-vir/test';
-import {DeployEnv} from '@evir/common';
+import {defaultRawUniversalConfig, DeployEnv} from '@evir/common';
 import {determineFrontendDeployEnv} from './determine-deploy-env.js';
 
 describe(determineFrontendDeployEnv.name, () => {
     itCases(determineFrontendDeployEnv, [
         {
             it: 'works in dev',
-            input: 'localhost',
+            inputs: [
+                'localhost',
+                defaultRawUniversalConfig,
+            ],
             expect: DeployEnv.Dev,
         },
         {
             it: 'works in staging',
-            input: 'staging.example.com',
+            inputs: [
+                'staging.app.example.com',
+                defaultRawUniversalConfig,
+            ],
             expect: DeployEnv.Staging,
         },
         {
             it: 'works in prod',
-            input: 'example.com',
+            inputs: [
+                'app.example.com',
+                defaultRawUniversalConfig,
+            ],
+            expect: DeployEnv.Prod,
+        },
+        {
+            it: 'treats unknown sub domains as staging',
+            inputs: [
+                'some-branch.app.example.com',
+                defaultRawUniversalConfig,
+            ],
+            expect: DeployEnv.Staging,
+        },
+        {
+            it: 'respects a different config host',
+            inputs: [
+                'app.example.io',
+                {
+                    topDomain: 'example.io',
+                    frontendProductionSubdomain: 'app',
+                },
+            ],
             expect: DeployEnv.Prod,
         },
     ]);

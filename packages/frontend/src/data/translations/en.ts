@@ -1,0 +1,252 @@
+/* eslint-disable sonarjs/no-hardcoded-passwords */
+
+import {type SimplifyPhrases} from 'i18n-vir';
+
+const englishPhrases = {
+    AppCredentials: {
+        emailLabel: 'Email:',
+        passwordLabel: 'Password:',
+    },
+    AppCreateAccount: {
+        createAnAccountHeader: 'Sign up below:',
+        passwordLengthRequirement: 'Your password must be at least {{length}} characters.',
+        alreadyHaveAccount: 'Already Have an account?',
+        signInInstead: 'Sign in instead.',
+        createAccountButton: 'Create Account',
+        yourNameLabel: 'Your name:',
+        companyName: 'Your company name:',
+        invalidEmailErrorMessage: 'Invalid email address.',
+        passwordTooShortErrorMessage: 'Password too short.',
+        passwordFailed: 'Password failed.',
+        accountCreationFailed: 'Account creation failed.',
+    },
+    AppTeamDetails: {
+        teamNameLabel: 'Team Name',
+        isApprovedLabel: 'Is Approved?',
+        isTestLabel: 'Is Test?',
+        deactivateTeamButtonText: 'Deactivate',
+        cancelTeamEditsButtonText: 'Cancel',
+        saveTeamEditsButtonText: 'Save',
+        confirmDeactivateTeam:
+            'Are you sure you want to deactivate team {{teamName}}? This team has {{userCount}} attached to it.',
+        failedToSave: 'Failed to save.',
+        failedToDeactivateTeam: 'Failed to deactivate team.',
+        error: 'Error.',
+    },
+    AppTeamUser: {
+        cancelUserEditsButtonText: 'Cancel',
+        saveUserEditsButtonText: 'Save',
+        deactivateUserButtonText: 'Deactivate',
+        selectUser: 'Select a User',
+        nameLabel: 'Name',
+        emailAddressLabel: 'Email Address',
+        isAdminLabel: 'Is Admin?',
+        isTestUserLabel: 'Is Test User?',
+        userIsInvited: 'User is invited.',
+        resendInvite: 'Resend invite',
+        userIsLocked: 'Account is locked.',
+        unlockUser: 'Unlock user',
+        newUserHeading: 'New User',
+        userHeading: 'User: {{name}} ({{email}})',
+        assumeIdentityButton: 'Assume Identity',
+        confirmUnlockUser:
+            'Are you sure you want to unlock user {{name}}? This will clear their password and send a password reset email.',
+        confirmDeactivateUser: 'Are you sure you want to deactivate user {{name}}, {{email}}?',
+        failedToSave: 'Failed to save.',
+        failedToResendInvite: 'Failed to resend user invite.',
+        failedToAssumeIdentity: 'Failed to assume identity.',
+        failedToUnlockUser: 'Failed to unlock user.',
+        failedToDeactivateUser: 'Failed to deactivate user.',
+        error: 'Error.',
+    },
+    AppEmailSuccess: {
+        resendIn: 'Resend in',
+        sendEmailAgainButtonText: 'Send Again',
+        youWillReceiveALink: 'You will receive a verification link at:',
+        accountCreatedTitle: 'Account created!',
+        pleaseVerifyYourAccount: 'Please verify your email.',
+        accountCreatedSubtitle: 'Please verify your email to continue. You will receive a link at:',
+        accountCreatedEmailSentSubtitle:
+            'Please verify your email to continue. You received a link at:',
+        forgotPasswordSubtitle:
+            'If your info matches an existing account, you will receive a password reset link to your email:',
+        passwordResetTitle: 'You must create a new password.',
+        passwordResetSubtitle: 'You will receive a password reset link at:',
+        linkSuccessfullyResent: 'Link resent.',
+        failedToResend: 'Failed to resend.',
+    },
+    AppResetPassword: {
+        passwordResetWillBeSent: 'A password reset link will be emailed to you.',
+        rememberYourPassword: 'Remember your password?',
+        returnToSignIn: 'Return to sign in.',
+        submitPasswordResetButton: 'Reset Password',
+        enterEmailPrompt: "Enter your account's email address to reset your password:",
+        passwordResetFailed: 'Password reset failed.',
+    },
+    AppInternalAdmin: {
+        internalAdminHeader: 'Internal App Admin',
+        tabs: {
+            teams: 'Teams',
+            devDb: 'Dev DB',
+        },
+    },
+    AppSettingsPage: {
+        settingsHeader: 'Settings',
+        tabs: {
+            user: 'User',
+            team: 'Team',
+            members: 'Members',
+        },
+    },
+    AppTeamUsers: {
+        inviteUserButtonText: 'Invite User',
+        lockedLabel: '🔒 Locked',
+    },
+    AppTeam: {
+        tabs: {
+            details: 'Details',
+            users: 'Users',
+        },
+        tags: {
+            approved: 'Approved',
+            test: 'Test',
+            admin: 'Admin',
+        },
+        selectATeam: 'Select a team',
+        newTeam: 'New Team',
+        teamHeader: 'Team:',
+        failedToLoadTeam: 'Failed to load team.',
+    },
+    AppInternalAdminTeams: {
+        createTeamButtonText: 'Create Team',
+        userCount: '{{count}} user',
+        userCountPlural: '{{count}} users',
+    },
+    AppScrollList: {
+        searchLabel: 'Search',
+        noResults: 'None',
+        failedToLoadOptions: 'Failed to load options.',
+    },
+    AppUserNotApproved: {
+        pendingApprovalMessage: 'Your account is pending admin approval, please wait.',
+    },
+    AppUserSettings: {
+        signInSettingsHeader: 'Sign-in Settings',
+    },
+    AppUserSignInSettings: {
+        enterEditModeButton: 'Edit',
+        sendPasswordChangeEmail: 'Send Password Change Email',
+        saveEditButton: 'Save',
+        emailHeader: 'Email:',
+        passwordHeader: 'Password:',
+        cancelEditingButton: 'Cancel',
+        passwordChangeEmailed: 'Password change link emailed',
+        signInSettingsInfoTableAriaLabel: 'Sign In Settings',
+        failedToSaveEmail: 'Failed to save new email address. Please try again.',
+    },
+    AppUserSettingsPage: {
+        userSettingsHeader: 'User Settings',
+    },
+    AppFooter: {
+        contactUsLink: 'Contact',
+    },
+    AppFeedback: {
+        feedbackInputLabel: 'Type in your feedback below:',
+        submitFeedbackButton: 'Submit',
+        cancelFeedbackButton: 'Cancel',
+        feedbackSubmittedSuccessfully: 'Feedback submitted, thank you!',
+        failedToSendFeedback: 'Failed to send feedback.',
+    },
+    AppThemeSwitcher: {
+        lightLabel: 'Light',
+        darkLabel: 'Dark',
+        autoLabel: 'Auto',
+    },
+    AppUserHeader: {
+        settingsLink: 'Settings',
+        logoutButton: 'Logout',
+        adminLink: 'Admin',
+        isAdminSubtitle: 'Internal Admin',
+        feedbackButton: 'Feedback',
+        feedbackModalHeader: 'Send us feedback!',
+    },
+    AppVerify: {
+        invalidInvitation: 'Invalid invitation.',
+        verifying: 'Verifying...',
+        invalidLink: 'Invalid verification link.',
+        accountVerificationError: 'Failed to verify your email.',
+        accountAlreadyVerifiedErrorMessage: 'Your account is already verified!',
+        accountVerificationSignIn:
+            'If you already verified your account, sign in to access your account.',
+        accountVerificationResend:
+            'If you need a new verification email, sign in again to generate a new code.',
+        changedEmailVerificationError: 'Failed to verify your new email: {{errorMessage}}',
+        passwordResetError: 'Invalid code.',
+        emailVerified: 'Email verified!',
+        newEmailVerified: 'New email address successfully verified!',
+        unknownSuccess: 'Unknown success template.',
+    },
+    AppSignIn: {
+        createAccount: 'Create a new one.',
+        forgotPassword: 'Forgot your password?',
+        noAccount: "Don't have an account?",
+        signInButton: 'Sign in',
+        pleaseSignIn: 'Please sign in to {{appName}}:',
+        credentialsMismatch: 'Credentials mismatch.',
+        failedToSignIn: 'Failed to sign in.',
+    },
+    AppEnterResetPassword: {
+        submitNewPasswordButton: 'Submit New Password',
+        submitFirstPasswordButton: 'Create Password',
+        successfulPasswordChange: 'Password successfully changed.',
+        successfulPasswordCreation: 'Password successfully set.',
+        enterNewPasswordHeader: 'Please enter your new password:',
+        createFirstPasswordHeader: 'Please create a password and enter your name:',
+        yourNameLabel: 'Your name:',
+        passwordResetFailedWithMessage: 'Password reset failed: {{message}}',
+        passwordResetFailedGeneric: 'Password reset failed.',
+    },
+    AppHeader: {
+        appTab: 'App',
+        navigateToTab: 'Navigate to the {{tabName}} page.',
+        navigateToHome: 'Navigate to app home page.',
+    },
+    AppMarketingPage: {
+        welcome: 'Welcome!',
+        goToApp: 'Go to app',
+        signIn: 'Sign in',
+    },
+
+    teamFilter: {
+        active: 'Active',
+        approved: 'Approved',
+        notApproved: 'Not Approved',
+        test: 'Test',
+        admin: 'Admin',
+        deactivated: 'Deactivated',
+    },
+    userPermissionLabel: {
+        canManageUsers: 'Can Manage Team Users',
+        canEditTeamDetails: 'Can Edit Team Details',
+    },
+    AppLinkProxy: {
+        loading: 'Loading...',
+        missingLink: 'Missing link.',
+        emptyLink: 'Empty link.',
+        invalidLink: 'Invalid link.',
+        failedToLoadLink: 'Failed to load link.',
+    },
+    AppInternalAdminDevDb: {
+        queryFailed: 'Query failed.',
+        runQueryPrompt: 'Run a query to see results here.',
+        submitButton: 'Submit',
+        failedToRunQuery: 'Failed to run query.',
+    },
+    AppUserAppPage: {
+        failedToLoadUser: 'Failed to load user.',
+        failedToImportElement: 'Failed to import element.',
+    },
+} as const;
+
+export default englishPhrases;
+export type TranslationPhrases = SimplifyPhrases<typeof englishPhrases>;

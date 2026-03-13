@@ -1,7 +1,20 @@
 {
     "name": "@evir/mono-root",
     "private": true,
+    "homepage": "https://github.com/electrovir/full-stack",
+    "bugs": {
+        "url": "https://github.com/electrovir/full-stack/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/electrovir/full-stack.git"
+    },
     "license": "(MIT or CC0 1.0)",
+    "author": {
+        "name": "electrovir",
+        "url": "https://github.com/electrovir"
+    },
+    "sideEffects": false,
     "type": "module",
     "workspaces": [
         "packages/*"
@@ -9,15 +22,17 @@
     "scripts": {
         "build:backend": "npm run compile && tsx node_modules/@augment-vir/node/src/scripts/fix-src-imports.script.ts",
         "build:frontend": "npm run build --workspace @evir/frontend",
-        "compile": "virmator compile",
-        "db:reset": "npm run db:reset --workspace @evir/database",
+        "compile": "npm run init && virmator compile",
+        "deploy": "npm run deploy --workspace @evir/scripts",
+        "dev": "bash packages/scripts/src/run-dev.sh",
         "format": "virmator format",
-        "postinstall": "npm run --workspace @evir/database db:gen || true",
+        "fresh": "npm run init && bash packages/scripts/src/run-dev.sh",
+        "init": "npm run install --prefix node_modules/better-sqlite3 && npm run --workspace @evir/database db:gen && npm run --workspace @evir/database db:reset",
         "lint": "virmator lint fix",
-        "start": "concurrently --colors -c green,blue --names backend,frontend \"npm run dev --workspace @evir/backend\" \"npm run start --workspace @evir/frontend\"",
-        "test": "mono-vir for-each-async npm run test",
-        "test:all": "npm run compile && concurrently --colors --kill-others-on-fail -c auto --names tests,spelling,format,deps,lint \"npm run test:coverage\" \"npm run test:spelling\" \"npm run test:format\" \"npm run test:deps\" \"npm run test:lint\"",
-        "test:coverage": "mono-vir for-each-async npm run test:coverage",
+        "prisma": "npx tsx packages/common-backend/src/backend-client-interface/clients/prisma/prisma.script.ts",
+        "start": "npm ci && npm run init && npm run dev",
+        "test": "npm test --workspace=@evir/e2e && mono-vir for-each-async npm run test:all",
+        "test:all": "npm run compile && runstorm --names tests,spelling,format,deps,lint \"npm run test:spelling\" \"npm run test:format\" \"npm run test:deps\" \"npm run test:lint\" && npm run test",
         "test:deps": "virmator deps check",
         "test:format": "virmator format check",
         "test:lint": "virmator lint",
@@ -25,38 +40,40 @@
         "test:update": "mono-vir for-each-async npm run test:update"
     },
     "overrides": {
-        "xml2js": "^0.6.2"
+        "@playwright/test": "1.56.1",
+        "playwright": "1.56.1"
     },
     "devDependencies": {
-        "@eslint/eslintrc": "^3.3.1",
-        "@eslint/js": "^9.27.0",
-        "@stylistic/eslint-plugin": "^4.2.0",
-        "@stylistic/eslint-plugin-ts": "^4.2.0",
-        "@typescript-eslint/eslint-plugin": "^8.32.1",
-        "cspell": "^9.0.2",
-        "dependency-cruiser": "^16.10.2",
-        "esbuild": "^0.25.4",
-        "eslint": "^9.27.0",
-        "eslint-config-prettier": "^10.1.5",
-        "eslint-plugin-jsdoc": "^50.6.17",
+        "@eslint/eslintrc": "^3.3.5",
+        "@eslint/js": "^9.39.2",
+        "@stylistic/eslint-plugin": "^5.10.0",
+        "@stylistic/eslint-plugin-ts": "^4.4.1",
+        "@typescript-eslint/eslint-plugin": "^8.57.0",
+        "cspell": "^9.7.0",
+        "dependency-cruiser": "^17.3.8",
+        "esbuild": "^0.27.3",
+        "eslint": "^9.39.2",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-jsdoc": "^62.7.1",
         "eslint-plugin-monorepo-cop": "^1.0.2",
-        "eslint-plugin-playwright": "^2.2.0",
-        "eslint-plugin-prettier": "^5.4.0",
+        "eslint-plugin-playwright": "^2.9.0",
+        "eslint-plugin-prettier": "^5.5.5",
         "eslint-plugin-require-extensions": "^0.1.3",
-        "eslint-plugin-sonarjs": "^3.0.2",
-        "eslint-plugin-unicorn": "^59.0.1",
-        "mono-vir": "^2.0.6",
-        "npm-check-updates": "^18.0.1",
+        "eslint-plugin-sonarjs": "^4.0.2",
+        "eslint-plugin-unicorn": "^63.0.0",
+        "mono-vir": "^2.5.0",
+        "npm-check-updates": "^19.6.3",
         "prettier": "~3.3.3",
         "prettier-plugin-interpolated-html-tags": "^2.0.1",
-        "prettier-plugin-jsdoc": "^1.3.2",
-        "prettier-plugin-multiline-arrays": "^4.0.3",
-        "prettier-plugin-organize-imports": "^4.1.0",
-        "prettier-plugin-packagejson": "^2.5.14",
-        "prettier-plugin-sort-json": "^4.1.1",
-        "prettier-plugin-toml": "^2.0.5",
-        "typescript-eslint": "^8.32.1",
-        "virmator": "^13.15.1"
+        "prettier-plugin-jsdoc": "^1.8.0",
+        "prettier-plugin-multiline-arrays": "^4.1.4",
+        "prettier-plugin-organize-imports": "^4.3.0",
+        "prettier-plugin-packagejson": "^3.0.2",
+        "prettier-plugin-sort-json": "^4.2.0",
+        "prettier-plugin-toml": "^2.0.6",
+        "runstorm": "^1.0.0",
+        "typescript-eslint": "^8.57.0",
+        "virmator": "^14.8.3"
     },
     "engines": {
         "node": ">=22"

@@ -1,22 +1,27 @@
-import {appCreateAccountBookPage} from '../sign-in/app-create-account.element.book.js';
-import {appCredentialsBookPage} from '../sign-in/app-credentials.element.book.js';
-import {appResetPasswordBookPage} from '../sign-in/app-reset-password.element.book.js';
-import {appSignInBookPage} from '../sign-in/app-sign-in.element.book.js';
+import {type BookPage} from 'element-book';
+import {appLogoBookPage} from '../common/app-logo.element.book.js';
+import {appThemeSwitcherBookPage} from '../common/app-theme-switcher.element.book.js';
+import {appHeaderUserBookPage} from '../header/app-user-header.element.book.js';
 import {appEmailSuccessBookPage} from '../verify-code/app-email-success.element.book.js';
-import {appEnterResetPasswordBookPage} from '../verify-code/app-enter-reset-password.element.book.js';
-import {elementsPage} from './top-level-pages.js';
+import {elementsBookPage, stylesBookPage} from './top-level-book-pages.js';
 
-const elementPages = [
-    appCreateAccountBookPage,
-    appCredentialsBookPage,
+function sortBookPages(bookPages: BookPage[]) {
+    return bookPages.sort((a, b) => a.title.localeCompare(b.title));
+}
+
+const allTopLevelBookPages = sortBookPages([
+    elementsBookPage,
+    stylesBookPage,
+]);
+
+const allChildBookPages = sortBookPages([
     appEmailSuccessBookPage,
-    appEnterResetPasswordBookPage,
-    appResetPasswordBookPage,
-    appSignInBookPage,
-].sort((a, b) => a.title.localeCompare(b.title));
+    appHeaderUserBookPage,
+    appLogoBookPage,
+    appThemeSwitcherBookPage,
+]);
 
-export const allPages = [
-    elementsPage,
-
-    ...elementPages,
+export const allBookPages = [
+    ...allTopLevelBookPages,
+    ...allChildBookPages,
 ];

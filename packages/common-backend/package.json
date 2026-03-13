@@ -8,20 +8,32 @@
     "types": "src/index.ts",
     "scripts": {
         "compile": "virmator compile",
-        "docs": "virmator docs",
         "test": "virmator test node",
-        "test:coverage": "npm run test",
-        "test:update": "npm test update"
+        "test:all": "npm run test"
     },
     "dependencies": {
-        "@augment-vir/assert": "^31.20.0",
-        "@augment-vir/node": "^31.20.0",
+        "@augment-vir/assert": "^31.68.1",
+        "@augment-vir/common": "^31.68.1",
+        "@augment-vir/node": "^31.68.1",
         "@evir/common": "*",
-        "date-vir": "^7.3.1"
+        "@evir/database": "*",
+        "@prisma/client": "^6.19.0",
+        "@rest-vir/define-service": "^1.5.0",
+        "@rest-vir/implement-service": "^1.5.0",
+        "auth-vir": "^3.1.0",
+        "cli-vir": "^1.0.3",
+        "date-vir": "^8.2.1",
+        "mailgun.js": "^12.7.1",
+        "object-shape-tester": "^6.11.0",
+        "prisma-vir": "^2.3.3",
+        "sentry-vir": "^4.0.3",
+        "type-fest": "^5.4.4",
+        "updating-secrets": "^1.1.1",
+        "url-vir": "^2.1.7"
     },
     "devDependencies": {
-        "@augment-vir/test": "^31.20.0",
-        "@types/node": "^22.15.21"
+        "@augment-vir/test": "^31.68.1",
+        "@types/node": "^25.3.3"
     },
     "engines": {
         "node": ">=22"

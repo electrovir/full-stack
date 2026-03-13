@@ -1,13 +1,68 @@
 generator jsClient {
     provider        = "prisma-client"
-    previewFeatures = ["strictUndefinedChecks", "driverAdapters", "relationJoins", "queryCompiler"]
+    previewFeatures = ["strictUndefinedChecks", "relationJoins"]
     output          = "../src/generated"
+    engineType      = "client"
     moduleFormat    = "esm"
 }
 
+generator shapes {
+    provider = "prisma-shapes"
+    output   = "../src/generated"
+}
+
+generator stringDates {
+    provider = "prisma-string-dates"
+    output   = "../src/generated"
+}
+
+generator brandedFields {
+    provider = "prisma-branded-fields"
+    output   = "../src/generated"
+}
+
 datasource db {
-    provider = "postgresql"
+    provider = "sqlite"
     url      = env("DATABASE_URL")
+}
+
+model Team {
+    id            String    @id @default(cuid(2))
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @default(now()) @updatedAt
+    deactivatedAt DateTime?
+
+    /// If false, the team still needs approval by an admin to be allowed to use the app. 
+    isTeamApprovedByAdmin Boolean
+    /// If true, this team is an app admin team. Only admin users that are a part of the admin team may administrate the app.
+    isInternalAdminTeam   Boolean @default(false)
+    isTestTeam            Boolean @default(false)
+    teamName              String
+
+    emailLogs        EmailLog[]
+    eventLogs        EventLog[]
+    teamPermissions  TeamPermission[]
+    inviteEmailCodes EmailCode[]
+}
+
+model TeamPermission {
+    id        String   @id @default(cuid(2))
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    /// If this set of team permissions is active still or not.
+    isEnabled Boolean
+    user      User    @relation(fields: [userId], references: [id])
+    userId    String
+    team      Team    @relation(fields: [teamId], references: [id])
+    teamId    String
+
+    /// This user can manage (invite, edit, deactivate) other users in this team.
+    canManageUsers     Boolean @default(true)
+    /// This user can edit team details (team name, settings, etc.).
+    canEditTeamDetails Boolean @default(true)
+
+    @@unique([userId, teamId])
 }
 
 model User {
@@ -16,19 +71,42 @@ model User {
     updatedAt     DateTime  @default(now()) @updatedAt
     deactivatedAt DateTime?
 
+    /// If false, the user still needs approval by an admin to be allowed to use the app. 
+    isUserApprovedByAdmin  Boolean
     /// Hashed and salted password.
-    password                  String
+    /// If no password is stored, the user cannot login.
+    password               String?
     /// Email address is not unique because a user may deactivate their account and create a new one later.
-    emailAddress              String
+    emailAddress           String
     /// This must be kept in sync with the User `emailAddress` field. This is used to prevent multiple
-    /// users with the same email but with different casing or other extra email bits.
-    normalizedEmailAddress    String
-    /// If the user changes their email address, it gets saved here until they verify the new email address.
-    unverifiedNewEmailAddress String?
-    accountVerifiedAt         DateTime?
+    /// users with the same email but with different casing.
+    normalizedEmailAddress String
+    accountVerifiedAt      DateTime?
+    /// The account has been locked, preventing app access, likely because of too many login attempts.
+    accountLockedAt        DateTime?
+    /// Human name of the user.
+    humanName              String
+    /// If true, this user is an internal company admin. Only admin users that are a part of the admin team may be full internal admins.
+    isInternalAdmin        Boolean   @default(false)
+    isTestUser             Boolean   @default(false)
 
-    userActions UserAction[]
-    emailCodes  EmailCode[]
+    emailCodes                 EmailCode[]
+    eventLogs                  EventLog[]
+    emailLogsSentToUser        EmailLog[]       @relation(name: "EmailLogSentToUser")
+    emailLogsSentBecauseOfUser EmailLog[]       @relation(name: "EmailLogSentBecauseOfUser")
+    teamPermissions            TeamPermission[]
+}
+
+model LinkProxy {
+    id            String    @id @default(cuid(2))
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @default(now()) @updatedAt
+    deactivatedAt DateTime?
+
+    /// The URL that this proxies to
+    originalUrl String
+    description String
+    eventLogs   EventLog[]
 }
 
 enum EmailCodeType {
@@ -38,6 +116,8 @@ enum EmailCodeType {
     ChangedEmailVerification
     /// Verifies retting the user's password.
     PasswordReset
+    /// An invitation for a new user.
+    UserInvitation
 }
 
 model EmailCode {
@@ -46,38 +126,98 @@ model EmailCode {
     updatedAt DateTime @default(now()) @updatedAt
 
     /// hashed
-    code         String
-    codeType     EmailCodeType
+    code          String
+    codeType      EmailCodeType
     /// Indicates that this email code has been used. Codes cannot be used more than once.
-    usedAt       DateTime?
+    usedAt        DateTime?
+    /// Indicates that this email code was deactivated before it was used.
+    deactivatedAt DateTime?
     /// The email address that this code was sent to. This might not exactly match the related
     /// user's current email address because users can modify their email address.
-    emailAddress String
+    emailAddress  String
 
+    /// The user for whom the code was created.
     user   User   @relation(fields: [userId], references: [id], onUpdate: Restrict, onDelete: Restrict)
     userId String
+
+    /// The team the user is being invited to join. Only set for UserInvitation codes.
+    invitedToTeam   Team?   @relation(fields: [invitedToTeamId], references: [id], onUpdate: Restrict, onDelete: Restrict)
+    invitedToTeamId String?
+
+    eventLogs    EventLog[]
+    causedEmails EmailLog[]
+
+    @@index(userId)
 }
 
-enum UserActionType {
-    SignUp
-    Login
-    EmailCodeSent
-    EmailCodeVerified
-    EmailCodeFailed
-}
-
-/// a log of all actions performed by all users
-model UserAction {
+model EmailLog {
     id        String   @id @default(cuid(2))
     createdAt DateTime @default(now())
     updatedAt DateTime @default(now()) @updatedAt
 
-    actionType    UserActionType
-    /// A JSON object with extra, arbitrary details for this user action
-    actionDetails Json?
-    /// IP address of the user when they made the action
-    userIpAddress String
+    sentToEmailAddresses Json
+    sentFromEmailAddress String
+    subject              String
 
-    userId String
-    user   User   @relation(fields: [userId], references: [id], onUpdate: Restrict, onDelete: Restrict)
+    sentToUsers User[] @relation(name: "EmailLogSentToUser")
+
+    sentBecauseOfEmailCodeId String?
+    sentBecauseOfEmailCode   EmailCode? @relation(fields: [sentBecauseOfEmailCodeId], references: [id])
+    sentBecauseOfUserId      String?
+    sentBecauseOfUser        User?      @relation(name: "EmailLogSentBecauseOfUser", fields: [sentBecauseOfUserId], references: [id])
+
+    relevantTeamId String?
+    relevantTeam   Team?   @relation(fields: [relevantTeamId], references: [id])
+}
+
+enum AuthenticationOutcome {
+    AccountLocked
+    FailedInvalidEmail
+    FailedUserNotFound
+    FailedWrongPassword
+    LoginSuccess
+    PasswordResetCompleted
+    PasswordResetRequested
+    SignUp
+    SignUpWithExistingEmail
+    UserHasNoPassword
+}
+
+enum EventLogName {
+    AuthenticationEvent
+    EmailChangeRequested
+    EmailCodeFailure
+    EmailCodeSend
+    EmailCodeVerify
+    EmailSend
+    LinkOpen
+    ResendVerificationCode
+    UserFeedbackSent
+}
+
+model EventLog {
+    id        String   @id @default(cuid(2))
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    eventName EventLogName
+    extraData Json?
+    /// The IP of the relevant request's client.
+    clientIp  String?
+
+    userId      String?
+    user        User?      @relation(fields: [userId], references: [id], onUpdate: Restrict, onDelete: Restrict)
+    emailCodeId String?
+    emailCode   EmailCode? @relation(fields: [emailCodeId], references: [id])
+    linkProxyId String?
+    linkProxy   LinkProxy? @relation(fields: [linkProxyId], references: [id])
+    teamId      String?
+    team        Team?      @relation(fields: [teamId], references: [id])
+
+    @@index(eventName)
+    @@index(extraData)
+    @@index(userId)
+    @@index(emailCodeId)
+    @@index(linkProxyId)
+    @@index(teamId)
 }
