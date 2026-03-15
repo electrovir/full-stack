@@ -1,4 +1,4 @@
-import {getOrSet} from '@augment-vir/common';
+import {type MaybePromise} from '@augment-vir/common';
 import {DeployEnv, testNameSearchParamKey} from '@evir/common';
 import {type BaseSearchParams} from '@rest-vir/define-service';
 import {
@@ -6,13 +6,13 @@ import {
     createBackendClientInterface,
 } from './backend-client-interface.js';
 
-/** Used in e2e tests to ensure that each test runs in isolation of the others. */
-const backendClientInterfaceStore: Record<string, BackendClientInterface> = {};
+/** Only used in e2e tests. */
+const backendClientInterfaceStore: Record<string, Promise<BackendClientInterface>> = {};
 
-export async function getBackendClientInterface(
+export function getBackendClientInterface(
     defaultBackendClientInterface: BackendClientInterface,
     searchParams: BaseSearchParams | undefined,
-): Promise<BackendClientInterface> {
+): MaybePromise<BackendClientInterface> {
     if (defaultBackendClientInterface.backendEnvClient.deployEnv !== DeployEnv.Dev) {
         return defaultBackendClientInterface;
     }
@@ -20,12 +20,20 @@ export async function getBackendClientInterface(
     const urlTestName: string | undefined =
         searchParams?.[testNameSearchParamKey]?.[0] || undefined;
 
-    return urlTestName
-        ? await getOrSet(backendClientInterfaceStore, urlTestName, async () => {
-              return await createBackendClientInterface({
-                  ...defaultBackendClientInterface.backendEnvClient,
-                  test: urlTestName,
-              });
-          })
-        : defaultBackendClientInterface;
+    if (urlTestName) {
+        const existingPromise = backendClientInterfaceStore[urlTestName];
+        if (existingPromise) {
+            return existingPromise;
+        }
+
+        const newClientInterface = createBackendClientInterface({
+            ...defaultBackendClientInterface.backendEnvClient,
+            test: urlTestName,
+        });
+        backendClientInterfaceStore[urlTestName] = newClientInterface;
+
+        return newClientInterface;
+    } else {
+        return defaultBackendClientInterface;
+    }
 }

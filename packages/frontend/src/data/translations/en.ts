@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-passwords */
-
 import {type SimplifyPhrases} from 'i18n-vir';
 
 const englishPhrases = {

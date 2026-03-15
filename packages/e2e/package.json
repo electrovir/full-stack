@@ -21,7 +21,7 @@
         "@augment-vir/test": "^31.68.1",
         "@evir/common-backend": "*",
         "@playwright/test": "1.56.1",
-        "auth-vir": "^3.1.0",
+        "auth-vir": "^3.1.2",
         "playwright": "1.56.1",
         "spa-router-vir": "^6.4.1",
         "url-vir": "^2.1.7"

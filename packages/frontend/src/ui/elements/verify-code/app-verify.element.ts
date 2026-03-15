@@ -243,7 +243,7 @@ async function sendVerifyRequest(
     ) {
         try {
             if (codeType === EmailCodeType.AccountVerification) {
-                handleAuthResponse(result.response, csrfOptions);
+                await handleAuthResponse(result.response, csrfOptions);
             }
             const user = await loadUser(frontendState.apiClient);
 

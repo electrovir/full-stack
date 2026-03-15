@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-passwords */
-
 import {backendDefinitionShapes} from '@evir/common';
 import {HttpStatus} from '@rest-vir/run-service';
 import {describeEndpoint} from './test-endpoints.mock.js';

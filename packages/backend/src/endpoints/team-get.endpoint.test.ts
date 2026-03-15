@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-passwords */
-
 import {applyBrand, HttpStatus} from '@augment-vir/common';
 import {backendDefinitionShapes, ModelName, type TeamPermission, type User} from '@evir/common';
 import {

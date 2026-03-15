@@ -95,6 +95,14 @@ describe(AppVerify.tagName, () => {
             text: invitedEmail,
         });
 
+        await e2eUtil
+            .expect(
+                page.getByRole('heading', {
+                    name: 'New User',
+                }),
+            )
+            .toBeVisible();
+
         /** Save the invite. */
         await page
             .getByRole('button', {
@@ -102,6 +110,14 @@ describe(AppVerify.tagName, () => {
             })
             .first()
             .click();
+
+        await e2eUtil
+            .expect(
+                page.getByRole('heading', {
+                    name: 'New User',
+                }),
+            )
+            .not.toBeVisible();
 
         /** Log out the admin. */
         await e2eUtil.logout(testContext);

@@ -78,7 +78,7 @@ export const AppSignIn = defineAppElement<{
                             },
                         });
                     } else {
-                        handleAuthResponse(output.response, csrfOptions);
+                        await handleAuthResponse(output.response, csrfOptions);
                         dispatch(new UserEditEvent(output.data));
                         if (inputs.wipeUrlAfterLogin) {
                             dispatch(

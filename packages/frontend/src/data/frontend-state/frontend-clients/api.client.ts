@@ -1,8 +1,9 @@
-import {mergeDeep, wait} from '@augment-vir/common';
+import {HttpStatus, mergeDeep, wait} from '@augment-vir/common';
 import {
     CustomHeader,
     defineBackendService,
     DeployEnv,
+    EndpointAuth,
     type AssumedUser,
     type BackendApi,
     type FrontendRouter,
@@ -12,6 +13,16 @@ import {type FrontendAuthClient} from 'auth-vir';
 import {insertUrlTestName} from '../../url-test-name.js';
 import {type FrontendEnvClient} from './frontend-env.client.js';
 import {type AppLocalStorageClient} from './local-storage.client.js';
+
+/**
+ * Once a 401 is received, block all subsequent fetches so the backend isn't flooded with
+ * guaranteed-to-fail requests while the frontend transitions to the sign-in page.
+ */
+let authBlocked = false;
+
+export function resetAuthBlock(): void {
+    authBlocked = false;
+}
 
 export async function createApiClient({
     frontendEnvClient,
@@ -47,7 +58,7 @@ export async function createApiClient({
 
         return generateApi(service, {
             endpointFetch: {
-                async fetch(url, init) {
+                async fetch(url, init, endpoint) {
                     if (frontendEnvClient.deployEnv === DeployEnv.Dev) {
                         /** Simulate network delays. */
                         await wait({
@@ -55,11 +66,25 @@ export async function createApiClient({
                         });
                     }
 
+                    const requiredAuth = endpoint?.customProps?.requiredAuth;
+                    const bypassAuthBlock =
+                        requiredAuth === EndpointAuth.BlockAuthenticated ||
+                        requiredAuth === EndpointAuth.Any;
+
+                    if (authBlocked && !bypassAuthBlock) {
+                        await frontendAuthClient.verifyResponseAuth({
+                            status: HttpStatus.Unauthorized,
+                        });
+                        return new Response(null, {
+                            status: HttpStatus.Unauthorized,
+                        });
+                    }
+
                     const selectedTeamId = localStorageClient.get.selectedTeamId();
 
                     const combinedInit = mergeDeep(
                         init,
-                        frontendAuthClient.createAuthenticatedRequestInit(),
+                        await frontendAuthClient.createAuthenticatedRequestInit(),
                         {
                             headers: {
                                 [CustomHeader.FrontendSource]: window.location.href,

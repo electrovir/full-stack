@@ -1,13 +1,15 @@
 import {check, checkWrap} from '@augment-vir/assert';
 import {combineErrorMessages, ensureErrorAndPrependMessage} from '@augment-vir/common';
 import {colorCss} from '@electrovir/color';
-import {ScreenSize, type UserResponse} from '@evir/common';
+import {csrfOptions, ScreenSize, type UserResponse} from '@evir/common';
 import {
     createFrontendState,
     type FrontendState,
 } from '@evir/frontend/src/data/frontend-state/frontend-state.js';
+import {wipeCurrentCsrfToken} from 'auth-vir';
 import {asyncProp, type AsyncValue, css, html, type HtmlInterpolation, listen} from 'element-vir';
 import {ViraError} from 'vira';
+import {resetAuthBlock} from '../../../data/frontend-state/frontend-clients/api.client.js';
 import {type FrontendStateObservable} from '../../../data/frontend-state/frontend-state.js';
 import {ChangeRouteEvent} from '../../events/change-route.event.js';
 import {LogoutEvent} from '../../events/logout.event.js';
@@ -247,7 +249,11 @@ export const AppEntryPoint = defineAppElement()({
             <div
                 class="everything-wrapper"
                 ${listen(LogoutEvent, async () => {
-                    await frontendState.frontendAuthClient.logout();
+                    await Promise.allSettled([
+                        wipeCurrentCsrfToken(csrfOptions),
+                        frontendState.frontendAuthClient.logout(),
+                    ]);
+
                     window.scrollTo({
                         behavior: 'instant',
                         left: 0,
@@ -280,6 +286,11 @@ export const AppEntryPoint = defineAppElement()({
                 })}
                 ${listen(UserEditEvent, (event) => {
                     const user = frontendState.user;
+                    const isLogin = !user;
+
+                    if (isLogin) {
+                        resetAuthBlock();
+                    }
 
                     const modifiedUser = {
                         ...(user instanceof Error || user instanceof Promise || !user ? {} : user),

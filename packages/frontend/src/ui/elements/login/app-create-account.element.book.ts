@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-passwords */
-
 import {assert} from '@augment-vir/assert';
 import {defineBookPage} from 'element-book';
 import {html, onDomCreated} from 'element-vir';

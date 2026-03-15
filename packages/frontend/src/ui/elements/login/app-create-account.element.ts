@@ -125,7 +125,7 @@ export const AppCreateAccount = defineAppElement<{
                         },
                     },
                 });
-                wrapInTry(() => handleAuthResponse(output.response, csrfOptions));
+                await wrapInTry(() => handleAuthResponse(output.response, csrfOptions));
 
                 if (output.ok) {
                     updateState({

@@ -20,7 +20,7 @@
         "@prisma/client": "^6.19.0",
         "@rest-vir/define-service": "^1.5.0",
         "@rest-vir/implement-service": "^1.5.0",
-        "auth-vir": "^3.1.0",
+        "auth-vir": "^3.1.2",
         "cli-vir": "^1.0.3",
         "date-vir": "^8.2.1",
         "mailgun.js": "^12.7.1",

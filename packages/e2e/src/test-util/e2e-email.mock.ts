@@ -1,5 +1,5 @@
 import {assert, assertWrap, waitUntil} from '@augment-vir/assert';
-import {sanitizeFileName} from '@augment-vir/common';
+import {ensureErrorAndPrependMessage, sanitizeFileName} from '@augment-vir/common';
 import {readJsonFile} from '@augment-vir/node';
 import {type UniversalTestContext} from '@augment-vir/test';
 import {DeployEnv} from '@evir/common';
@@ -21,11 +21,11 @@ export async function findEmailFile(
     await waitUntil.isTrue(
         () => existsSync(emailDirPath),
         {
-            timeout: {
-                minutes: 1,
-            },
             interval: {
                 seconds: 1,
+            },
+            timeout: {
+                minutes: 1,
             },
         },
         `Email dir never showed up: '${emailDirPath}'`,
@@ -40,14 +40,19 @@ export async function findEmailFile(
             );
         },
         {
-            timeout: {
-                minutes: 1,
-            },
             interval: {
                 seconds: 1,
             },
+            timeout: {
+                minutes: 1,
+            },
         },
+        'Never found file email file name.',
     );
 
-    return (await readJsonFile(join(emailDirPath, foundFileName))) as DevEmailFile;
+    try {
+        return (await readJsonFile(join(emailDirPath, foundFileName))) as DevEmailFile;
+    } catch (error) {
+        throw ensureErrorAndPrependMessage(error, 'Failed to read email JSON file');
+    }
 }

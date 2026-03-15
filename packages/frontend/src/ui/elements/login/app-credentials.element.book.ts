@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-passwords */
-
 import {check} from '@augment-vir/assert';
 import {BookPageControlType, defineBookPage, definePageControl} from 'element-book';
 import {css, type CSSResult, html, listen} from 'element-vir';

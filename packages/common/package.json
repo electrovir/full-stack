@@ -15,7 +15,7 @@
         "@augment-vir/common": "^31.68.1",
         "@evir/database": "*",
         "@rest-vir/define-service": "^1.5.0",
-        "auth-vir": "^3.1.0",
+        "auth-vir": "^3.1.2",
         "date-vir": "^8.2.1",
         "object-shape-tester": "^6.11.0",
         "spa-router-vir": "^6.4.1",

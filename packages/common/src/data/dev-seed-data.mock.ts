@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-passwords */
-
 import {check} from '@augment-vir/assert';
 import {applyBrand, mapObjectValues} from '@augment-vir/common';
 import {hashPassword} from 'auth-vir';

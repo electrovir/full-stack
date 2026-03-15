@@ -6,7 +6,7 @@ import {getCurrentCsrfToken} from 'auth-vir';
 export async function loadUser(
     apiPromise: MaybePromise<BackendApi>,
 ): Promise<UserResponse | undefined> {
-    const {csrfToken} = getCurrentCsrfToken(csrfOptions);
+    const {csrfToken} = await getCurrentCsrfToken(csrfOptions);
 
     if (csrfToken) {
         const api = await apiPromise;

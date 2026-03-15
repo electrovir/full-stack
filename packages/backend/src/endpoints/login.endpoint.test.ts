@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-hardcoded-passwords */
-
 import {
     AuthenticationOutcome,
     backendDefinitionShapes,
