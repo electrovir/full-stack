@@ -33,7 +33,7 @@
         "type-fest": "^5.4.4",
         "typed-event-target": "^4.3.0",
         "url-vir": "^2.1.7",
-        "vira": "^31.7.2"
+        "vira": "^31.7.3"
     },
     "devDependencies": {
         "@augment-vir/test": "^31.68.1",

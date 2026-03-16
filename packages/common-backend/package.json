@@ -33,7 +33,7 @@
     },
     "devDependencies": {
         "@augment-vir/test": "^31.68.1",
-        "@types/node": "^25.3.3"
+        "@types/node": "^25.5.0"
     },
     "engines": {
         "node": ">=22"
