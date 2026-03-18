@@ -51,11 +51,10 @@ async function patchRootPackageJson(
     workspaceRelativePaths: ReadonlyArray<string>,
 ) {
     const rootPackageJsonPath = join(buildFinalDirPath, 'package.json');
-    const rootPackageJson = await readPackageJson(rootPackageJsonPath);
+    const rootPackageJson = await readPackageJson(buildFinalDirPath);
 
     rootPackageJson.workspaces = [...workspaceRelativePaths];
 
-    delete rootPackageJson.scripts;
     delete rootPackageJson.devDependencies;
     delete rootPackageJson.overrides;
 
@@ -66,7 +65,6 @@ async function patchWorkspacePackageJson(packageDirPath: string) {
     const packageJsonFilePath = join(packageDirPath, 'package.json');
     const packageJsonContents = await readPackageJson(packageDirPath);
 
-    delete packageJsonContents.scripts;
     delete packageJsonContents.devDependencies;
 
     await writeFile(packageJsonFilePath, JSON.stringify(packageJsonContents, null, 4) + '\n');
@@ -243,6 +241,12 @@ async function runDeploy(rawArgs: ReadonlyArray<string>) {
         await patchRootPackageJson(buildFinalDirPath, workspaceRelativePaths);
 
         await runShellCommand('npm install --omit=dev', {
+            cwd: buildFinalDirPath,
+            hookUpToConsole: true,
+            rejectOnError: true,
+        });
+
+        await runShellCommand('npm run init', {
             cwd: buildFinalDirPath,
             hookUpToConsole: true,
             rejectOnError: true,

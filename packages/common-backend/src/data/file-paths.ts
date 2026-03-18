@@ -53,11 +53,8 @@ export const githubDirPath = join(monoRepoDirPath, '.github');
 
 /** All of these file paths should _always_ exist. */
 const pathsThatShouldAlwaysExist = [
-    githubDirPath,
     monoRepoDirPath,
     packagesDirPath,
-    ...Object.values(packageDirPaths),
-    frontendSrcDirPath,
     databasePrismaDirPath,
     prismaSchemaFilePath,
 ];
