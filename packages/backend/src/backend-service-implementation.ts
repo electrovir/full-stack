@@ -24,6 +24,7 @@ import {internalAdminEventGraphEndpoint} from './endpoints/internal-admin/intern
 import {internalAdminResendInviteEndpoint} from './endpoints/internal-admin/internal-admin-resend-invite.endpoint.js';
 import {internalAdminTeamListEndpoint} from './endpoints/internal-admin/internal-admin-team-list.endpoint.js';
 import {internalAdminUnlockUserEndpoint} from './endpoints/internal-admin/internal-admin-unlock-user.endpoint.js';
+import {releaseNameEndpoint} from './endpoints/release-name.endpoint.js';
 import {loginEndpoint} from './endpoints/login.endpoint.js';
 import {resendLinkEndpoint} from './endpoints/resend-link.endpoint.js';
 import {resetPasswordEndpoint} from './endpoints/reset-password.endpoint.js';
@@ -161,6 +162,7 @@ export function implementBackend(defaultBackendClientInterface: Readonly<Backend
                 throw new Error('Intentional error.');
             },
 
+            '/release-name': releaseNameEndpoint,
             '/feedback': feedbackEndpoint,
             '/get-link/:linkId': getLinkEndpoint,
             '/internal-admin/create-team': internalAdminCreateTeamEndpoint,

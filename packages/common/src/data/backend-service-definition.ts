@@ -174,6 +174,17 @@ export function defineBackendService(
                     requiredAuth: EndpointAuth.Any,
                 },
             },
+            '/release-name': {
+                methods: {
+                    [HttpMethod.Get]: true,
+                },
+                requestDataShape: undefined,
+                responseDataShape: '',
+                requiredClientOrigin: AnyOrigin,
+                customProps: {
+                    requiredAuth: EndpointAuth.Any,
+                },
+            },
             /** Same as `/health`. */
             '/': {
                 methods: {
